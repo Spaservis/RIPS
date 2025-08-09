@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Captura de Datos RIPS </title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f8;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+  }
+  h1 {
+    text-align: center;
+    color: #1f4e79;
+  }
+  form {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 900px;
+    margin: auto;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+  fieldset {
+    border: 1px solid #ccc;
+    margin-bottom: 15px;
+    padding: 15px;
+    border-radius: 8px;
+  }
+  legend {
+    font-weight: bold;
+    color: #1f4e79;
+  }
+  label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+  }
+  input, select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  button {
+    padding: 10px 15px;
+    margin-top: 10px;
+    border: none;
+    background: #1f4e79;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  button:hover {
+    background: #163a59;
+  }
+</style>
+</head>
+<body>
+
+<h1>Captura de Datos RIPS </h1>
+
+<form id="ripsForm">
+
+  <fieldset>
+    <legend>Datos de la Factura Electrónica</legend>
+    <label>Número de la Factura:</label>
+    <input type="text" name="numero_factura" required>
+    <label>Fecha de Emisión:</label>
+    <input type="date" name="fecha_emision" required>
+    <label>Fecha de Vencimiento:</label>
+    <input type="date" name="fecha_vencimiento">
+  </fieldset>
+
+  <fieldset>
+    <legend>Datos del Prestador</legend>
+    <label>Código del Prestador:</label>
+    <input type="text" name="codigo_prestador" required>
+    <label>Razón Social:</label>
+    <input type="text" name="razon_social" required>
+    <label>Tipo de Identificación:</label>
+    <select name="tipo_id_prestador">
+      <option value="NI">NIT</option>
+      <option value="CC">Cédula</option>
+    </select>
+    <label>Número de Identificación:</label>
+    <input type="text" name="id_prestador" required>
+  </fieldset>
+
+  <fieldset>
+    <legend>Datos del Usuario</legend>
+    <label>Tipo de Identificación:</label>
+    <select name="tipo_id_usuario" required>
+      <option value="CC">Cédula de Ciudadanía</option>
+      <option value="TI">Tarjeta de Identidad</option>
+      <option value="RC">Registro Civil</option>
+      <option value="CE">Cédula de Extranjería</option>
+    </select>
+    <label>Número de Identificación:</label>
+    <input type="text" name="id_usuario" required>
+    <label>Primer Apellido:</label>
+    <input type="text" name="primer_apellido" required>
+    <label>Segundo Apellido:</label>
+    <input type="text" name="segundo_apellido">
+    <label>Primer Nombre:</label>
+    <input type="text" name="primer_nombre" required>
+    <label>Segundo Nombre:</label>
+    <input type="text" name="segundo_nombre">
+    <label>Sexo:</label>
+    <select name="sexo" required>
+      <option value="M">Masculino</option>
+      <option value="F">Femenino</option>
+    </select>
+    <label>Edad:</label>
+    <input type="number" name="edad" min="0" required>
+  </fieldset>
+
+  <fieldset>
+    <legend>Datos de la Atención</legend>
+    <label>Fecha de la Consulta:</label>
+    <input type="date" name="fecha_consulta" required>
+    <label>Número de Autorización:</label>
+    <input type="text" name="numero_autorizacion">
+    <label>Código CUPS:</label>
+    <input type="text" name="codigo_cups" placeholder="Ej. 890101">
+    <label>Código Diagnóstico Principal (CIE-10):</label>
+    <input type="text" name="codigo_dx_principal" placeholder="Ej. A00">
+    <label>Código Diagnóstico Relacionado (CIE-10):</label>
+    <input type="text" name="codigo_dx_relacionado">
+  </fieldset>
+
+ <fieldset>
+    <legend>Observaciones</legend>
+    <textarea name="observaciones" rows="4" placeholder="Escriba observaciones adicionales..."></textarea>
+  </fieldset>
+
+  <button type="button" onclick="descargarCSV()">Descargar CSV</button>
+  <button type="reset">Limpiar</button>
+
+</form>
+
+<script>
+function descargarCSV() {
+    const form = document.getElementById('ripsForm');
+    const data = new FormData(form);
+    const valores = [];
+    const encabezados = [];
+    for (let [key, value] of data.entries()) {
+        encabezados.push(key);
+        valores.push(value);
+    }
+    const csvContent = encabezados.join(",") + "\n" + valores.join(",");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "rips_2275.csv");
+    link.click();
+}
+</script>
+
+</body>
+</html>

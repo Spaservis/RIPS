@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Reporte RIPS - Captura de Datos</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f9fafb;
+    margin: 0; padding: 20px;
+    color: #333;
+  }
+  h1, h2 {
+    text-align: center;
+    color: #005b96;
+  }
+  form {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 25px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    border-radius: 8px;
+  }
+  label {
+    display: block;
+    margin: 15px 0 5px 0;
+    font-weight: bold;
+  }
+  input[type="text"],
+  input[type="date"],
+  input[type="number"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    font-size: 1em;
+    box-sizing: border-box;
+  }
+  textarea {
+    resize: vertical;
+  }
+  button, #exportBtn, #limpiarBtn {
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    font-size: 1.1em;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-top: 20px;
+    display: block;
+    width: 100%;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    transition: background-color 0.3s ease;
+  }
+  button:hover, #exportBtn:hover, #limpiarBtn:hover {
+    filter: brightness(85%);
+  }
+  #exportBtn {
+    background-color: #005b96;
+  }
+  #limpiarBtn {
+    background-color: #c82333;
+  }
+  #tablaRegistros {
+    max-width: 900px;
+    margin: 30px auto;
+    display: none;
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    overflow-x: auto;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 1100px;
+  }
+  th, td {
+    padding: 8px 10px;
+    border: 1px solid #bbb;
+    text-align: left;
+    white-space: nowrap;
+  }
+  th {
+    background-color: #005b96;
+    color: white;
+  }
+  #mensajeExito {
+    max-width: 900px;
+    margin: 10px auto 0 auto;
+    padding: 12px;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+    border-radius: 5px;
+    display: none;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<h1>Datos de la Consulta</h1>
+
+<form id="ripsForm" onsubmit="return generarReporte(event)">
+
+  <label for="numeroFactura">Número de la factura:</label>
+  <input type="text" id="numeroFactura" name="numeroFactura" required maxlength="30" />
+
+  <label for="codigoPrestador">Código del prestador de servicios de salud:</label>
+  <input type="text" id="codigoPrestador" name="codigoPrestador" required maxlength="20" />
+
+  <label for="tipoIdentificacionUsuario">Tipo de identificación del usuario:</label>
+  <select id="tipoIdentificacionUsuario" name="tipoIdentificacionUsuario" required>
+    <option value="">-- Seleccione --</option>
+    <option value="CC">Cédula de Ciudadanía</option>
+    <option value="TI">Tarjeta de Identidad</option>
+    <option value="CE">Cédula de Extranjería</option>
+    <option value="PAS">Pasaporte</option>
+    <option value="OTRO">Otro</option>
+  </select>
+
+  <label for="idUsuarioSistema">Número de identificación del usuario en el sistema:</label>
+  <input type="text" id="idUsuarioSistema" name="idUsuarioSistema" required maxlength="30" />
+
+  <label for="fechaConsulta">Fecha de la consulta:</label>
+  <input type="date" id="fechaConsulta" name="fechaConsulta" required />
+
+  <label for="numeroAutorizacion">Número de autorización:</label>
+  <input type="text" id="numeroAutorizacion" name="numeroAutorizacion" maxlength="30" />
+
+  <label for="codigoConsulta">Código de la consulta:</label>
+  <input type="text" id="codigoConsulta" name="codigoConsulta" maxlength="20" />
+
+  <label for="finalidadConsulta">Finalidad de la consulta:</label>
+  <input type="text" id="finalidadConsulta" name="finalidadConsulta" maxlength="50" />
+
+  <label for="causaExterna">Causa externa:</label>
+  <input type="text" id="causaExterna" name="causaExterna" maxlength="50" />
+
+  <label for="codigoDiagnosticoPrincipal">Código del diagnóstico principal:</label>
+  <input type="text" id="codigoDiagnosticoPrincipal" name="codigoDiagnosticoPrincipal" maxlength="10" />
+
+  <label for="codigoDiagnosticoRel1">Código del diagnóstico relacionado No. 1:</label>
+  <input type="text" id="codigoDiagnosticoRel1" name="codigoDiagnosticoRel1" maxlength="10" />
+
+  <label for="codigoDiagnosticoRel2">Código del diagnóstico relacionado No. 2:</label>
+  <input type="text" id="codigoDiagnosticoRel2" name="codigoDiagnosticoRel2" maxlength="10" />
+
+  <label for="codigoDiagnosticoRel3">Código del diagnóstico relacionado No. 3:</label>
+  <input type="text" id="codigoDiagnosticoRel3" name="codigoDiagnosticoRel3" maxlength="10" />
+
+  <label for="tipoDiagnosticoPrincipal">Tipo de diagnóstico principal:</label>
+  <input type="text" id="tipoDiagnosticoPrincipal" name="tipoDiagnosticoPrincipal" maxlength="20" />
+
+  <label for="valorConsulta">Valor de la consulta (COP):</label>
+  <input type="number" id="valorConsulta" name="valorConsulta" min="0" step="0.01" required />
+
+  <label for="valorCuotaModeradora">Valor de la cuota moderadora (COP):</label>
+  <input type="number" id="valorCuotaModeradora" name="valorCuotaModeradora" min="0" step="0.01" required />
+
+  <label for="valorNetoPagar">Valor neto a pagar (COP):</label>
+  <input type="number" id="valorNetoPagar" name="valorNetoPagar" min="0" step="0.01" required />
+
+  <button type="submit">Agregar Registro</button>
+</form>
+
+<button id="exportBtn" type="button" style="display:none;">Exportar Registros a CSV</button>
+<button id="limpiarBtn" type="button" style="display:none;">Limpiar Registros</button>
+
+<div id="mensajeExito">Registro agregado correctamente.</div>
+
+<div id="tablaRegistros" style="display:none;">
+  <h2>Registros Ingresados</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Número de la factura</th>
+        <th>Código del prestador de servicios de salud</th>
+        <th>Tipo de identificación del usuario</th>
+        <th>Número de identificación del usuario en el sistema</th>
+        <th>Fecha de la consulta</th>
+        <th>Número de autorización</th>
+        <th>Código de la consulta</th>
+        <th>Finalidad de la consulta</th>
+        <th>Causa externa</th>
+        <th>Código del diagnóstico principal</th>
+        <th>Código del diagnóstico relacionado No. 1</th>
+        <th>Código del diagnóstico relacionado No. 2</th>
+        <th>Código del diagnóstico relacionado No. 3</th>
+        <th>Tipo de diagnóstico principal</th>
+        <th>Valor de la consulta (COP)</th>
+        <th>Valor de la cuota moderadora (COP)</th>
+        <th>Valor neto a pagar (COP)</th>
+      </tr>
+    </thead>
+    <tbody id="tbodyRegistros"></tbody>
+  </table>
+</div>
+
+<script>
+  const registros = [];
+
+  const limpiarBtn = document.getElementById('limpiarBtn');
+
+  function agregarRegistro(data) {
+    registros.push(data);
+  }
+
+  function actualizarTabla() {
+    const tbody = document.getElementById('tbodyRegistros');
+    tbody.innerHTML = '';
+    registros.forEach(reg => {
+      const fila = document.createElement('tr');
+      fila.innerHTML = `
+        <td>${reg.numeroFactura}</td>
+        <td>${reg.codigoPrestador}</td>
+        <td>${reg.tipoIdentificacionUsuario}</td>
+        <td>${reg.idUsuarioSistema}</td>
+        <td>${reg.fechaConsulta}</td>
+        <td>${reg.numeroAutorizacion || ''}</td>
+        <td>${reg.codigoConsulta || ''}</td>
+        <td>${reg.finalidadConsulta || ''}</td>
+        <td>${reg.causaExterna || ''}</td>
+        <td>${reg.codigoDiagnosticoPrincipal || ''}</td>
+        <td>${reg.codigoDiagnosticoRel1 || ''}</td>
+        <td>${reg.codigoDiagnosticoRel2 || ''}</td>
+        <td>${reg.codigoDiagnosticoRel3 || ''}</td>
+        <td>${reg.tipoDiagnosticoPrincipal || ''}</td>
+        <td>${parseFloat(reg.valorConsulta).toFixed(2)}</td>
+        <td>${parseFloat(reg.valorCuotaModeradora).toFixed(2)}</td>
+        <td>${parseFloat(reg.valorNetoPagar).toFixed(2)}</td>
+      `;
+      tbody.appendChild(fila);
+    });
+
+    const tabla = document.getElementById('tablaRegistros');
+    const btnExport = document.getElementById('exportBtn');
+
+    if (registros.length > 0) {
+      tabla.style.display = 'block';
+      btnExport.style.display = 'block';
+      limpiarBtn.style.display = 'block';
+    } else {
+      tabla.style.display = 'none';
+      btnExport.style.display = 'none';
+      limpiarBtn.style.display = 'none';
+    }
+  }
+
+  function descargarCSV() {
+    if (registros.length === 0) {
+      alert('No hay registros para exportar.');
+      return;
+    }
+
+    const encabezados = [
+      'Número de la factura',
+      'Código del prestador de servicios de salud',
+      'Tipo de identificación del usuario',
+      'Número de identificación del usuario en el sistema',
+      'Fecha de la consulta',
+      'Número de autorización',
+      'Código de la consulta',
+      'Finalidad de la consulta',
+      'Causa externa',
+      'Código del diagnóstico principal',
+      'Código del diagnóstico relacionado No. 1',
+      'Código del diagnóstico relacionado No. 2',
+      'Código del diagnóstico relacionado No. 3',
+      'Tipo de diagnóstico principal',
+      'Valor de la consulta (COP)',
+      'Valor de la cuota moderadora (COP)',
+      'Valor neto a pagar (COP)'
+    ];
+
+    const filas = registros.map(reg => [
+      `"${reg.numeroFactura}"`,
+      `"${reg.codigoPrestador}"`,
+      `"${reg.tipoIdentificacionUsuario}"`,
+      `"${reg.idUsuarioSistema}"`,
+      reg.fechaConsulta,
+      `"${reg.numeroAutorizacion || ''}"`,
+      `"${reg.codigoConsulta || ''}"`,
+      `"${reg.finalidadConsulta || ''}"`,
+      `"${reg.causaExterna || ''}"`,
+      `"${reg.codigoDiagnosticoPrincipal || ''}"`,
+      `"${reg.codigoDiagnosticoRel1 || ''}"`,
+      `"${reg.codigoDiagnosticoRel2 || ''}"`,
+      `"${reg.codigoDiagnosticoRel3 || ''}"`,
+      `"${reg.tipoDiagnosticoPrincipal || ''}"`,
+      parseFloat(reg.valorConsulta).toFixed(2),
+      parseFloat(reg.valorCuotaModeradora).toFixed(2),
+      parseFloat(reg.valorNetoPagar).toFixed(2)
+    ].join(','));
+
+    const csvContenido = [encabezados.join(','), ...filas].join('\r\n');
+
+    const blob = new Blob([csvContenido], {type: 'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'registros_rips.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function limpiarFormulario() {
+    document.getElementById('ripsForm').reset();
+  }
+
+  function mostrarMensajeExito() {
+    const mensaje = document.getElementById('mensajeExito');
+    mensaje.style.display = 'block';
+    setTimeout(() => {
+      mensaje.style.display = 'none';
+    }, 2500);
+  }
+
+  function limpiarRegistros() {
+    if (confirm('¿Estás seguro de que quieres eliminar todos los registros? Esta acción no se puede deshacer.')) {
+      registros.length = 0;  // Vacía el arreglo
+      actualizarTabla();
+    }
+  }
+
+  function generarReporte(event) {
+    event.preventDefault();
+
+    const data = {
+      numeroFactura: document.getElementById('numeroFactura').value.trim(),
+      codigoPrestador: document.getElementById('codigoPrestador').value.trim(),
+      tipoIdentificacionUsuario: document.getElementById('tipoIdentificacionUsuario').value,
+      idUsuarioSistema: document.getElementById('idUsuarioSistema').value.trim(),
+      fechaConsulta: document.getElementById('fechaConsulta').value,
+      numeroAutorizacion: document.getElementById('numeroAutorizacion').value.trim(),
+      codigoConsulta: document.getElementById('codigoConsulta').value.trim(),
+      finalidadConsulta: document.getElementById('finalidadConsulta').value.trim(),
+      causaExterna: document.getElementById('causaExterna').value.trim(),
+      codigoDiagnosticoPrincipal: document.getElementById('codigoDiagnosticoPrincipal').value.trim(),
+      codigoDiagnosticoRel1: document.getElementById('codigoDiagnosticoRel1').value.trim(),
+      codigoDiagnosticoRel2: document.getElementById('codigoDiagnosticoRel2').value.trim(),
+      codigoDiagnosticoRel3: document.getElementById('codigoDiagnosticoRel3').value.trim(),
+      tipoDiagnosticoPrincipal: document.getElementById('tipoDiagnosticoPrincipal').value.trim(),
+      valorConsulta: document.getElementById('valorConsulta').value,
+      valorCuotaModeradora: document.getElementById('valorCuotaModeradora').value,
+      valorNetoPagar: document.getElementById('valorNetoPagar').value,
+    };
+
+    agregarRegistro(data);
+    actualizarTabla();
+    limpiarFormulario();
+    mostrarMensajeExito();
+
+    return false;
+  }
+
+  document.getElementById('exportBtn').addEventListener('click', descargarCSV);
+  limpiarBtn.addEventListener('click', limpiarRegistros);
+
+</script>
+
+</body>
+</html>

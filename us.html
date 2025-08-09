@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Reporte RIPS - Captura de Datos</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f9fafb;
+    margin: 0; padding: 20px;
+    color: #333;
+  }
+  h1, h2 {
+    text-align: center;
+    color: #005b96;
+  }
+  form {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 25px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    border-radius: 8px;
+  }
+  label {
+    display: block;
+    margin: 15px 0 5px 0;
+    font-weight: bold;
+  }
+  input[type="text"],
+  input[type="date"],
+  input[type="number"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    font-size: 1em;
+    box-sizing: border-box;
+  }
+  textarea {
+    resize: vertical;
+  }
+  button, #exportBtn, #limpiarBtn {
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    font-size: 1.1em;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-top: 20px;
+    display: block;
+    width: 100%;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    transition: background-color 0.3s ease;
+  }
+  button:hover, #exportBtn:hover, #limpiarBtn:hover {
+    filter: brightness(85%);
+  }
+  #exportBtn {
+    background-color: #005b96;
+  }
+  #limpiarBtn {
+    background-color: #c82333;
+  }
+  #tablaRegistros {
+    max-width: 900px;
+    margin: 30px auto;
+    display: none;
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    overflow-x: auto;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 1100px;
+  }
+  th, td {
+    padding: 8px 10px;
+    border: 1px solid #bbb;
+    text-align: left;
+    white-space: nowrap;
+  }
+  th {
+    background-color: #005b96;
+    color: white;
+  }
+  #mensajeExito {
+    max-width: 900px;
+    margin: 10px auto 0 auto;
+    padding: 12px;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+    border-radius: 5px;
+    display: none;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<h1>Captura de Datos RIPS para Generar Reporte</h1>
+
+<form id="ripsForm" onsubmit="return generarReporte(event)">
+
+  <label for="tipoIdentificacion">Tipo de Identificación del Usuario:</label>
+  <select id="tipoIdentificacion" name="tipoIdentificacion" required>
+    <option value="">-- Seleccione --</option>
+    <option value="CC">Cédula de Ciudadanía</option>
+    <option value="TI">Tarjeta de Identidad</option>
+    <option value="CE">Cédula de Extranjería</option>
+    <option value="PAS">Pasaporte</option>
+    <option value="OTRO">Otro</option>
+  </select>
+
+  <label for="numIdSistema">Número de Identificación del Usuario del Sistema:</label>
+  <input type="text" id="numIdSistema" name="numIdSistema" required maxlength="30" />
+
+  <label for="codigoEntidad">Código Entidad Administradora:</label>
+  <input type="text" id="codigoEntidad" name="codigoEntidad" required maxlength="20" />
+
+  <label for="tipoUsuario">Tipo de Usuario:</label>
+  <select id="tipoUsuario" name="tipoUsuario" required>
+    <option value="">-- Seleccione --</option>
+    <option value="Afiliado">Afiliado</option>
+    <option value="Beneficiario">Beneficiario</option>
+    <option value="Otro">Otro</option>
+  </select>
+
+  <label for="primerApellido">Primer Apellido del Usuario:</label>
+  <input type="text" id="primerApellido" name="primerApellido" required maxlength="50" />
+
+  <label for="segundoApellido">Segundo Apellido del Usuario:</label>
+  <input type="text" id="segundoApellido" name="segundoApellido" maxlength="50" />
+
+  <label for="primerNombre">Primer Nombre del Usuario:</label>
+  <input type="text" id="primerNombre" name="primerNombre" required maxlength="50" />
+
+  <label for="segundoNombre">Segundo Nombre del Usuario:</label>
+  <input type="text" id="segundoNombre" name="segundoNombre" maxlength="50" />
+
+  <label for="edad">Edad (en número):</label>
+  <input type="number" id="edad" name="edad" required min="0" max="120" />
+
+  <label for="unidadEdad">Unidad de Medida de la Edad:</label>
+  <select id="unidadEdad" name="unidadEdad" required>
+    <option value="">-- Seleccione --</option>
+    <option value="Años">Años</option>
+    <option value="Meses">Meses</option>
+    <option value="Días">Días</option>
+  </select>
+
+  <label for="sexo">Sexo:</label>
+  <select id="sexo" name="sexo" required>
+    <option value="">-- Seleccione --</option>
+    <option value="M">Masculino</option>
+    <option value="F">Femenino</option>
+    <option value="O">Otro</option>
+  </select>
+
+  <label for="codigoDepartamento">Código del Departamento de Residencia Habitual:</label>
+  <input type="text" id="codigoDepartamento" name="codigoDepartamento" maxlength="10" />
+
+  <label for="codigoMunicipio">Código del Municipio de Residencia Habitual:</label>
+  <input type="text" id="codigoMunicipio" name="codigoMunicipio" maxlength="10" />
+
+  <label for="zonaResidencia">Zona de Residencia Habitual:</label>
+  <select id="zonaResidencia" name="zonaResidencia" required>
+    <option value="">-- Seleccione --</option>
+    <option value="Urbana">Urbana</option>
+    <option value="Rural">Rural</option>
+    <option value="Otro">Otro</option>
+  </select>
+
+  <label for="numAfiliacion">Número de Afiliación o Identificación:</label>
+  <input type="text" id="numAfiliacion" name="numAfiliacion" required maxlength="20" />
+
+  <label for="fechaAtencion">Fecha de Atención:</label>
+  <input type="date" id="fechaAtencion" name="fechaAtencion" required />
+
+  <label for="tipoAfiliacion">Tipo de Afiliación:</label>
+  <select id="tipoAfiliacion" name="tipoAfiliacion" required>
+    <option value="">-- Seleccione --</option>
+    <option value="Contributivo">Contributivo</option>
+    <option value="Subsidiado">Subsidiado</option>
+    <option value="Particular">Particular</option>
+    <option value="Otro">Otro</option>
+  </select>
+
+  <label for="codigoDiagnostico">Código Diagnóstico (CIE-10):</label>
+  <select id="codigoDiagnostico" name="codigoDiagnostico" required>
+    <option value="">-- Seleccione Código CIE-10 --</option>
+    <option value="A00">A00 - Cólera</option>
+    <option value="B20">B20 - Infección por VIH</option>
+    <option value="C34">C34 - Neoplasia maligna de bronquios y pulmón</option>
+    <option value="E11">E11 - Diabetes mellitus tipo 2</option>
+    <option value="I10">I10 - Hipertensión esencial (primaria)</option>
+  </select>
+
+  <label for="codigoCUPS">Código CUPS:</label>
+  <select id="codigoCUPS" name="codigoCUPS" required>
+    <option value="">-- Seleccione Código CUPS --</option>
+    <option value="101010">101010 - Consulta externa</option>
+    <option value="202020">202020 - Procedimiento quirúrgico menor</option>
+    <option value="303030">303030 - Hospitalización</option>
+    <option value="404040">404040 - Examen de laboratorio</option>
+    <option value="505050">505050 - Radiografía</option>
+  </select>
+
+  <label for="cantidad">Cantidad (Número de servicios prestados):</label>
+  <input type="number" id="cantidad" name="cantidad" required min="1" />
+
+  <label for="valorServicio">Valor del Servicio (COP):</label>
+  <input type="number" id="valorServicio" name="valorServicio" required min="0" step="0.01" />
+
+  <label for="observaciones">Observaciones / Notas adicionales:</label>
+  <textarea id="observaciones" name="observaciones" rows="3" placeholder="Escriba aquí cualquier detalle adicional..."></textarea>
+
+  <button type="submit">Agregar Registro</button>
+</form>
+
+<button id="exportBtn" type="button" style="display:none;">Exportar Registros a CSV</button>
+<button id="limpiarBtn" type="button" style="display:none;">Limpiar Registros</button>
+
+<div id="mensajeExito">Registro agregado correctamente.</div>
+
+<div id="tablaRegistros" style="display:none;">
+  <h2>Registros Ingresados</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Tipo ID Usuario</th>
+        <th>Número ID Sistema</th>
+        <th>Código Entidad</th>
+        <th>Tipo Usuario</th>
+        <th>Primer Apellido</th>
+        <th>Segundo Apellido</th>
+        <th>Primer Nombre</th>
+        <th>Segundo Nombre</th>
+        <th>Edad</th>
+        <th>Unidad Edad</th>
+        <th>Sexo</th>
+        <th>Código Departamento</th>
+        <th>Código Municipio</th>
+        <th>Zona Residencia</th>
+        <th>Número Afiliación</th>
+        <th>Fecha Atención</th>
+        <th>Tipo Afiliación</th>
+        <th>Código CIE-10</th>
+        <th>Código CUPS</th>
+        <th>Cantidad</th>
+        <th>Valor Servicio (COP)</th>
+        <th>Observaciones</th>
+      </tr>
+    </thead>
+    <tbody id="tbodyRegistros"></tbody>
+  </table>
+</div>
+
+<script>
+  const registros = [];
+
+  const limpiarBtn = document.getElementById('limpiarBtn');
+
+  function agregarRegistro(data) {
+    registros.push(data);
+  }
+
+  function actualizarTabla() {
+    const tbody = document.getElementById('tbodyRegistros');
+    tbody.innerHTML = '';
+    registros.forEach(reg => {
+      const fila = document.createElement('tr');
+      fila.innerHTML = `
+        <td>${reg.tipoIdentificacion}</td>
+        <td>${reg.numIdSistema}</td>
+        <td>${reg.codigoEntidad}</td>
+        <td>${reg.tipoUsuario}</td>
+        <td>${reg.primerApellido}</td>
+        <td>${reg.segundoApellido}</td>
+        <td>${reg.primerNombre}</td>
+        <td>${reg.segundoNombre}</td>
+        <td>${reg.edad}</td>
+        <td>${reg.unidadEdad}</td>
+        <td>${reg.sexo}</td>
+        <td>${reg.codigoDepartamento}</td>
+        <td>${reg.codigoMunicipio}</td>
+        <td>${reg.zonaResidencia}</td>
+        <td>${reg.numAfiliacion}</td>
+        <td>${reg.fechaAtencion}</td>
+        <td>${reg.tipoAfiliacion}</td>
+        <td>${reg.codigoDiagnosticoTexto}</td>
+        <td>${reg.codigoCUPSTexto}</td>
+        <td>${reg.cantidad}</td>
+        <td>${parseFloat(reg.valorServicio).toFixed(2)}</td>
+        <td>${reg.observaciones || ''}</td>
+      `;
+      tbody.appendChild(fila);
+    });
+
+    const tabla = document.getElementById('tablaRegistros');
+    const btnExport = document.getElementById('exportBtn');
+
+    if (registros.length > 0) {
+      tabla.style.display = 'block';
+      btnExport.style.display = 'block';
+      limpiarBtn.style.display = 'block';
+    } else {
+      tabla.style.display = 'none';
+      btnExport.style.display = 'none';
+      limpiarBtn.style.display = 'none';
+    }
+  }
+
+  function descargarCSV() {
+    if (registros.length === 0) {
+      alert('No hay registros para exportar.');
+      return;
+    }
+
+    const encabezados = [
+      'Tipo ID Usuario',
+      'Número ID Sistema',
+      'Código Entidad',
+      'Tipo Usuario',
+      'Primer Apellido',
+      'Segundo Apellido',
+      'Primer Nombre',
+      'Segundo Nombre',
+      'Edad',
+      'Unidad Edad',
+      'Sexo',
+      'Código Departamento',
+      'Código Municipio',
+      'Zona Residencia',
+      'Número Afiliación',
+      'Fecha Atención',
+      'Tipo Afiliación',
+      'Código CIE-10',
+      'Código CUPS',
+      'Cantidad',
+      'Valor Servicio (COP)',
+      'Observaciones'
+    ];
+
+    const filas = registros.map(reg => [
+      `"${reg.tipoIdentificacion}"`,
+      `"${reg.numIdSistema}"`,
+      `"${reg.codigoEntidad}"`,
+      `"${reg.tipoUsuario}"`,
+      `"${reg.primerApellido}"`,
+      `"${reg.segundoApellido}"`,
+      `"${reg.primerNombre}"`,
+      `"${reg.segundoNombre}"`,
+      reg.edad,
+      `"${reg.unidadEdad}"`,
+      `"${reg.sexo}"`,
+      `"${reg.codigoDepartamento}"`,
+      `"${reg.codigoMunicipio}"`,
+      `"${reg.zonaResidencia}"`,
+      `"${reg.numAfiliacion}"`,
+      reg.fechaAtencion,
+      `"${reg.tipoAfiliacion}"`,
+      `"${reg.codigoDiagnosticoTexto}"`,
+      `"${reg.codigoCUPSTexto}"`,
+      reg.cantidad,
+      parseFloat(reg.valorServicio).toFixed(2),
+      `"${(reg.observaciones || '').replace(/"/g, '""')}"`
+    ].join(','));
+
+    const csvContenido = [encabezados.join(','), ...filas].join('\r\n');
+
+    const blob = new Blob([csvContenido], {type: 'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'registros_rips.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function limpiarFormulario() {
+    document.getElementById('ripsForm').reset();
+  }
+
+  function mostrarMensajeExito() {
+    const mensaje = document.getElementById('mensajeExito');
+    mensaje.style.display = 'block';
+    setTimeout(() => {
+      mensaje.style.display = 'none';
+    }, 2500);
+  }
+
+  function limpiarRegistros() {
+    if (confirm('¿Estás seguro de que quieres eliminar todos los registros? Esta acción no se puede deshacer.')) {
+      registros.length = 0;  // Vacía el arreglo
+      actualizarTabla();
+    }
+  }
+
+  function generarReporte(event) {
+    event.preventDefault();
+
+    const data = {
+      tipoIdentificacion: document.getElementById('tipoIdentificacion').value,
+      numIdSistema: document.getElementById('numIdSistema').value.trim(),
+      codigoEntidad: document.getElementById('codigoEntidad').value.trim(),
+      tipoUsuario: document.getElementById('tipoUsuario').value,
+      primerApellido: document.getElementById('primerApellido').value.trim(),
+      segundoApellido: document.getElementById('segundoApellido').value.trim(),
+      primerNombre: document.getElementById('primerNombre').value.trim(),
+      segundoNombre: document.getElementById('segundoNombre').value.trim(),
+      edad: document.getElementById('edad').value,
+      unidadEdad: document.getElementById('unidadEdad').value,
+      sexo: document.getElementById('sexo').value,
+      codigoDepartamento: document.getElementById('codigoDepartamento').value.trim(),
+      codigoMunicipio: document.getElementById('codigoMunicipio').value.trim(),
+      zonaResidencia: document.getElementById('zonaResidencia').value,
+      numAfiliacion: document.getElementById('numAfiliacion').value.trim(),
+      fechaAtencion: document.getElementById('fechaAtencion').value,
+      tipoAfiliacion: document.getElementById('tipoAfiliacion').value,
+      codigoDiagnostico: document.getElementById('codigoDiagnostico').value,
+      codigoDiagnosticoTexto: document.getElementById('codigoDiagnostico').selectedOptions[0].text,
+      codigoCUPS: document.getElementById('codigoCUPS').value,
+      codigoCUPSTexto: document.getElementById('codigoCUPS').selectedOptions[0].text,
+      cantidad: document.getElementById('cantidad').value,
+      valorServicio: document.getElementById('valorServicio').value,
+      observaciones: document.getElementById('observaciones').value.trim(),
+    };
+
+    agregarRegistro(data);
+    actualizarTabla();
+    limpiarFormulario();
+    mostrarMensajeExito();
+
+    return false;
+  }
+
+  document.getElementById('exportBtn').addEventListener('click', descargarCSV);
+  limpiarBtn.addEventListener('click', limpiarRegistros);
+
+</script>
+
+</body>
+</html>

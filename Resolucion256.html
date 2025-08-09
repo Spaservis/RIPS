@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Reporte Enfermedades Huérfanas</title>
+  <!-- Bootstrap CDN para estilo rápido -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>
+    body { padding: 20px; background:#f8f9fa; }
+    .card { margin-bottom: 1rem; }
+    .small-muted { font-size:0.85rem; color:#6c757d; }
+    table td, table th { vertical-align: middle; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 class="mb-3"><span class="bi bi-file-earmark-medical"></span> Reporte de Enfermedades Huérfanas</h2>
+
+    <div class="row">
+      <div class="col-lg-4">
+        <div class="card p-3">
+          <h5>Nuevo registro</h5>
+          <form id="formRegistro">
+            <div class="mb-2">
+              <label class="form-label">Fecha</label>
+              <input type="date" id="fecha" class="form-control" required />
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Tipo de documento</label>
+              <select id="tipo_doc" class="form-select">
+                <option>CC</option><option>TI</option><option>RC</option><option>CE</option><option>PA</option><option>NUIP</option>
+              </select>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Número de documento</label>
+              <input id="num_doc" class="form-control" required />
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Nombre completo</label>
+              <input id="nombre" class="form-control" required />
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Sexo</label>
+              <select id="sexo" class="form-select">
+                <option>M</option><option>F</option>
+              </select>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Edad</label>
+              <input type="number" id="edad" class="form-control" min="0" required />
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Código CIE-11</label>
+              <input id="codigo_cie11" class="form-control" placeholder="Ej: 1A00" />
+              <div class="small-muted">Si tienes un CSV con códigos CIE-11, puedes cargarlo abajo para autocompletar la descripción.</div>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Descripción CIE-11</label>
+              <input id="desc_cie11" class="form-control" />
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Institución</label>
+              <input id="institucion" class="form-control" />
+            </div>
+
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-success">Guardar registro</button>
+            </div>
+          </form>
+
+          <hr />
+          <div class="mb-2">
+            <label class="form-label">Cargar lista CIE-11 (CSV con columnas Codigo,Descripcion)</label>
+            <input type="file" id="file_cie" accept=".csv" class="form-control" />
+          </div>
+          <div class="mb-2">
+            <button id="vaciar" class="btn btn-outline-danger w-100">Vaciar todos los registros</button>
+          </div>
+        </div>
+
+        <div class="card p-3">
+          <h6>Exportar / Descargar</h6>
+          <div class="mb-2">
+            <button id="exportExcel" class="btn btn-primary w-100">Exportar Excel protegido (clave: <strong>santiago</strong>)</button>
+          </div>
+          <small class="small-muted">Se descargará un archivo ZIP cifrado AES que contiene el Excel. Para abrir: contraseña <strong>santiago</strong>.</small>
+        </div>
+      </div>
+
+      <div class="col-lg-8">
+        <div class="card p-3">
+          <h5>Registros</h5>
+          <div class="row gx-2 gy-2 mb-2">
+            <div class="col-4">
+              <select id="filtro_sexo" class="form-select">
+                <option value="Todos">Todos</option><option value="M">M</option><option value="F">F</option>
+              </select>
+            </div>
+            <div class="col-4">
+              <input type="number" id="filtro_edad_min" class="form-control" placeholder="Edad mínima" min="0" />
+            </div>
+            <div class="col-4">
+              <input type="number" id="filtro_edad_max" class="form-control" placeholder="Edad máxima" min="0" />
+            </div>
+            <div class="col-12 mt-2">
+              <input id="filtro_institucion" class="form-control" placeholder="Filtrar por institución (texto libre)" />
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-striped" id="tablaRegistros">
+              <thead class="table-dark">
+                <tr>
+                  <th>Fecha</th><th>Tipo</th><th>N° Doc</th><th>Nombre</th><th>Sexo</th><th>Edad</th><th>Codigo CIE-11</th><th>Descripcion</th><th>Institucion</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <hr />
+          <div id="resumen_rapido"></div>
+        </div>
+
+        <div class="card p-3 mt-3">
+          <h6>Ayuda / Notas</h6>
+          <ul>
+            <li>El archivo con registros se guarda localmente en tu navegador (localStorage).</li>
+            <li>Al exportar, se generará un archivo ZIP cifrado con la contraseña <strong>santiago</strong>.</li>
+            <li>Para protección a nivel de archivo .xlsx al abrirlo sin ZIP, haría falta un proceso en servidor o software especializado.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Librerías: SheetJS (xlsx) + zip.js con soporte AES -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- zip.js (versión que soporta AES). Usamos el paquete del autor: -->
+  <script src="https://gildas-lormeau.github.io/zip.js/demos/zip.js"></script>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+  // --- Utilidades y persistencia ---
+  const STORAGE_KEY = 'registros_huerfanas_v1';
+  const PASS = 'santiago';
+
+  function cargarDatos() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    try { return JSON.parse(raw); } catch(e) { return []; }
+  }
+  function guardarDatos(arr) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+  }
+
+  // Inicializar fecha por defecto
+  document.getElementById('fecha').valueAsDate = new Date();
+
+  // Cargar tabla y filtros
+  function renderTabla() {
+    const datos = cargarDatos();
+    const tbody = document.querySelector('#tablaRegistros tbody');
+    tbody.innerHTML = '';
+
+    // filtros
+    const sexoFiltro = document.getElementById('filtro_sexo').value;
+    const edadMin = Number(document.getElementById('filtro_edad_min').value || NaN);
+    const edadMax = Number(document.getElementById('filtro_edad_max').value || NaN);
+    const instFiltro = document.getElementById('filtro_institucion').value.trim().toLowerCase();
+
+    let df = datos.slice().sort((a,b)=> new Date(b.Fecha) - new Date(a.Fecha));
+    df = df.filter(r=>{
+      if (sexoFiltro !== 'Todos' && r.Sexo !== sexoFiltro) return false;
+      if (!Number.isNaN(edadMin) && (isNaN(r.Edad) || Number(r.Edad) < ageSafe(edadMin))) return false;
+      if (!Number.isNaN(edadMax) && (isNaN(r.Edad) || Number(r.Edad) > ageSafe(edadMax))) return false;
+      if (instFiltro && !( (r.Institucion||'').toLowerCase().includes(instFiltro) )) return false;
+      return true;
+    });
+
+    df.forEach(r=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${escapeHtml(r.Fecha)}</td>
+        <td>${escapeHtml(r.Tipo_Documento)}</td>
+        <td>${escapeHtml(r.Numero_Documento)}</td>
+        <td>${escapeHtml(r.Nombre)}</td>
+        <td>${escapeHtml(r.Sexo)}</td>
+        <td>${escapeHtml(String(r.Edad))}</td>
+        <td>${escapeHtml(r.Codigo_CIE11)}</td>
+        <td>${escapeHtml(r.Descripcion_CIE11)}</td>
+        <td>${escapeHtml(r.Institucion)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    // resumen rápido
+    const total = df.length;
+    const edadPromedio = total > 0 ? (df.reduce((s,x)=> s + (Number(x.Edad)||0),0)/total).toFixed(1) : 'N/A';
+    const porSexo = df.reduce((acc,x)=> { acc[x.Sexo] = (acc[x.Sexo]||0)+1; return acc; }, {});
+    const resumenEl = document.getElementById('resumen_rapido');
+    resumenEl.innerHTML = `
+      <p><strong>Total registros:</strong> ${total}</p>
+      <p><strong>Edad promedio:</strong> ${edadPromedio}</p>
+      <p><strong>Distribución por sexo:</strong> ${Object.keys(porSexo).length===0 ? 'N/A' : Object.entries(porSexo).map(e=> e[0]+': '+e[1]).join(' | ')}</p>
+    `;
+  }
+
+  function ageSafe(v){ return Number.isFinite(Number(v)) ? Number(v) : NaN; }
+  function escapeHtml(s){ if (s==null) return ''; return String(s).replace(/[&<>"'`=\/]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','`':'&#96;','/':'&#47;','=':'&#61;'}[c]; }); }
+
+  // --- Manejo del formulario ---
+  document.getElementById('formRegistro').addEventListener('submit', function(e){
+    e.preventDefault();
+    const newR = {
+      Fecha: document.getElementById('fecha').value || new Date().toISOString().split('T')[0],
+      Tipo_Documento: document.getElementById('tipo_doc').value,
+      Numero_Documento: document.getElementById('num_doc').value.trim(),
+      Nombre: document.getElementById('nombre').value.trim(),
+      Sexo: document.getElementById('sexo').value,
+      Edad: Number(document.getElementById('edad').value || 0),
+      Codigo_CIE11: document.getElementById('codigo_cie11').value.trim(),
+      Descripcion_CIE11: document.getElementById('desc_cie11').value.trim(),
+      Institucion: document.getElementById('institucion').value.trim()
+    };
+
+    // validaciones sencillas
+    const faltan = [];
+    if (!newR.Nombre) faltan.push('Nombre');
+    if (!newR.Numero_Documento) faltan.push('Número de documento');
+    if (!newR.Codigo_CIE11) faltan.push('Código CIE-11');
+    if (!newR.Institucion) faltan.push('Institución');
+    if (!Number.isFinite(newR.Edad) || newR.Edad < 0) faltan.push('Edad inválida');
+
+    if (faltan.length>0) {
+      alert('Faltan o están inválidos: ' + faltan.join(', '));
+      return;
+    }
+
+    const arr = cargarDatos();
+    arr.push(newR);
+    guardarDatos(arr);
+    renderTabla();
+    this.reset();
+    document.getElementById('fecha').valueAsDate = new Date();
+    alert('Registro guardado correctamente.');
+  });
+
+  // filtros
+  ['filtro_sexo','filtro_edad_min','filtro_edad_max','filtro_institucion'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', renderTabla);
+  });
+
+  // vaciar
+  document.getElementById('vaciar').addEventListener('click', ()=>{
+    if (confirm('¿Seguro que deseas eliminar todos los registros? Esta acción no se puede deshacer.')) {
+      localStorage.removeItem(STORAGE_KEY);
+      renderTabla();
+    }
+  });
+
+  // carga inicial
+  renderTabla();
+
+  // --- Cargar CSV de CIE-11 para autocompletar descripción ---
+  let cieList = {}; // map codigo -> descripcion
+  document.getElementById('file_cie').addEventListener('change', function(e){
+    const f = this.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = function(ev){
+      const text = ev.target.result;
+      // parse CSV simple (expect columns Codigo,Descripcion)
+      const lines = text.split(/\r?\n/).map(s=> s.trim()).filter(Boolean);
+      // detect header
+      let start = 0;
+      if (lines[0].toLowerCase().includes('codigo') && lines[0].toLowerCase().includes('descripcion')) start = 1;
+      cieList = {};
+      for (let i=start;i<lines.length;i++){
+        // split by comma, but basic: first token code, rest description
+        const parts = lines[i].split(',');
+        if (parts.length >= 2) {
+          const code = parts[0].trim();
+          const desc = parts.slice(1).join(',').trim();
+          if (code) cieList[code] = desc;
+        }
+      }
+      alert('Lista CIE-11 cargada (' + Object.keys(cieList).length + ' códigos). Ahora al ingresar un código se autocompletará la descripción si existe.');
+    };
+    reader.readAsText(f);
+  });
+
+  // autocompletar descripcion al cambiar codigo
+  document.getElementById('codigo_cie11').addEventListener('input', function(){
+    const c = this.value.trim();
+    if (c && cieList[c]) {
+      document.getElementById('desc_cie11').value = cieList[c];
+    }
+  });
+
+  // --- Exportar a Excel y luego empaquetar en zip cifrado (password: santiago) ---
+  document.getElementById('exportExcel').addEventListener('click', async function(){
+    const datos = cargarDatos();
+    if (!datos || datos.length===0) { alert('No hay registros para exportar.'); return; }
+
+    // Convertir a hoja xlsx (SheetJS)
+    const ws = XLSX.utils.json_to_sheet(datos);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Registros');
+    const wbout = XLSX.write(wb, {bookType:'xlsx', type:'array'});
+
+    const excelBlob = new Blob([wbout], {type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+    // Ahora empaquetar en zip cifrado con zip.js (AES) — contraseña PASS
+    // zip.js global: zip
+    if (!self.zip || !zip.createWriter) {
+      // Si la librería no carga correctamente, descargar el .xlsx sin cifrar como fallback
+      const url = URL.createObjectURL(excelBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `reporte_enfermedades_huerfanas_${new Date().toISOString().slice(0,10)}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+      alert('zip.js no disponible, se descargó el XLSX sin cifrar.');
+      return;
+    }
+
+    try {
+      // create encrypted zip with one file: reporte.xlsx
+      const writerPromise = new Promise((resolve, reject) => {
+        zip.createWriter(new zip.BlobWriter("application/zip"), function(writer) {
+          // options: password for AES
+          // add file
+          writer.add("reporte_enfermedades_huerfanas.xlsx", new zip.BlobReader(excelBlob), function() {
+            writer.close(function(blob) {
+              resolve(blob);
+            });
+          }, {password: PASS, encryption: "aes"});
+        }, function(err) { reject(err); }, {useWebWorkers: false});
+      });
+
+      const zipBlob = await writerPromise;
+      const url = URL.createObjectURL(zipBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `reporte_enfermedades_huerfanas.zip`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch(err) {
+      console.error(err);
+      alert('Ocurrió un error al crear el ZIP cifrado. Revisa la consola. Se descargará el Excel sin cifrar como fallback.');
+      // fallback: descarga xlsx
+      const url = URL.createObjectURL(excelBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `reporte_enfermedades_huerfanas_${new Date().toISOString().slice(0,10)}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  });
+
+  // Si quieres, agregar función para importar registros desde Excel/CSV más tarde (no implementado aquí)
+
+  </script>
+</body>
+</html>

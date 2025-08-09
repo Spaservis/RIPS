@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Reporte de Eventos Adversos - Resolución 2048 de 2015</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- DataTables -->
+  <link href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" rel="stylesheet">
+
+  <style>
+    .action-btn { padding: 4px 8px; font-size: 0.9rem; }
+    td[contenteditable="true"] { outline: none; }
+    .small-font { font-size: 0.9rem; }
+    .required { color: #d9534f; }
+  </style>
+</head>
+<body class="bg-light">
+  <div class="container py-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h3 class="card-title mb-0">Reporte de Eventos Adversos</h3>
+          <small class="text-muted">Resolución 2048 de 2015</small>
+        </div>
+
+        <div class="row">
+          <!-- Form -->
+          <div class="col-md-4">
+            <form id="formRegistro" class="small-font">
+              <div class="mb-2">
+                <label class="form-label">Fecha del Evento</label>
+                <input type="date" id="fecha" class="form-control" />
+              </div>
+
+              <div class="mb-2">
+                <label class="form-label">Nombre del Paciente <span class="required">*</span></label>
+                <input type="text" id="nombre" class="form-control" placeholder="Nombre completo" />
+              </div>
+
+              <div class="mb-2">
+                <label class="form-label">Edad</label>
+                <input type="number" id="edad" class="form-control" min="0" />
+              </div>
+
+              <div class="mb-2">
+                <label class="form-label">Sexo</label>
+                <select id="sexo" class="form-select">
+                  <option>Femenino</option>
+                  <option>Masculino</option>
+                  <option>Otro</option>
+                </select>
+              </div>
+
+              <div class="mb-2">
+                <label class="form-label">Medicamento o Dispositivo Involucrado <span class="required">*</span></label>
+                <input type="text" id="medicamento" class="form-control" placeholder="Nombre del medicamento o dispositivo" />
+              </div>
+
+              <div class="mb-2">
+                <label class="form-label">Tipo de Evento</label>
+                <select id="tipo_evento" class="form-select">
+                  <option>Reacción adversa</option>
+                  <option>Fallo terapéutico</option>
+                  <option>Interacción</option>
+                  <option>Otro</option>
+                </select>
+              </div>
+
+              <div class="mb-2">
+                <label class="form-label">Gravedad</label>
+                <select id="gravedad" class="form-select">
+                  <option>Leve</option>
+                  <option>Moderado</option>
+                  <option>Grave</option>
+                  <option>Mortal</option>
+                </select>
+              </div>
+
+              <div class="mb-2">
+                <label class="form-label">Consecuencia</label>
+                <input type="text" id="consecuencia" class="form-control" />
+              </div>
+
+              <div class="mb-2">
+                <label class="form-label">Código CIE11 asociado</label>
+                <input type="text" id="cie11" class="form-control" />
+              </div>
+
+              <div class="mb-2">
+                <label class="form-label">Observaciones</label>
+                <textarea id="observaciones" class="form-control" rows="3"></textarea>
+              </div>
+
+              <div class="d-grid gap-2">
+                <button type="button" id="btnAgregar" class="btn btn-primary">Agregar Registro</button>
+                <button type="button" id="btnDescargar" class="btn btn-outline-success">Descargar en Excel</button>
+              </div>
+            </form>
+
+            <div class="mt-3 small text-muted">
+              <span class="required">*</span> Campos obligatorios.
+            </div>
+
+          </div>
+
+          <!-- Tabla -->
+          <div class="col-md-8">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h5 class="mb-0">Registros</h5>
+              <div>
+                <button id="btnBorrarTodos" class="btn btn-danger btn-sm">Eliminar todos los registros</button>
+              </div>
+            </div>
+
+            <table id="tablaRegistros" class="display nowrap table table-striped" style="width:100%">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Fecha</th>
+                  <th>Nombre Paciente</th>
+                  <th>Edad</th>
+                  <th>Sexo</th>
+                  <th>Medicamento/Dispositivo</th>
+                  <th>Tipo Evento</th>
+                  <th>Gravedad</th>
+                  <th>Consecuencia</th>
+                  <th>CIE11</th>
+                  <th>Observaciones</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+
+            <div id="alertPlaceholder" class="mt-2"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer class="text-center text-muted small mt-3">
+      Hecho con ❤️ — Guarda los datos en tu navegador (localStorage). Para respaldo, descarga el Excel.
+    </footer>
+  </div>
+
+  <!-- Librerías -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- DataTables JS -->
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+  <!-- SheetJS para exportar a Excel -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- FileSaver (opcional, SheetJS puede usarlo) -->
+  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+
+  <script>
+    (function () {
+      const STORAGE_KEY = 'registros_eventos_adversos_v1';
+      let tabla = null;
+
+      // Util: mensajes bootstrap
+      function showAlert(msg, tipo = 'info', tiempo = 3000) {
+        const id = 'a' + Date.now();
+        const html = `<div id="${id}" class="alert alert-${tipo} alert-dismissible fade show" role="alert">
+          ${msg}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+        </div>`;
+        $('#alertPlaceholder').append(html);
+        if (tiempo > 0) setTimeout(() => $('#' + id).alert('close'), tiempo);
+      }
+
+      // Inicializar fecha por defecto a hoy
+      $('#fecha').val(new Date().toISOString().slice(0,10));
+
+      // Cargar datos desde localStorage
+      function cargarRegistros() {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return [];
+        try {
+          return JSON.parse(raw);
+        } catch (e) {
+          console.error('Error parseando storage', e);
+          return [];
+        }
+      }
+
+      function guardarRegistros(datos) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(datos || []));
+      }
+
+      // Inicializar DataTable
+      function initTabla() {
+        tabla = $('#tablaRegistros').DataTable({
+          data: [],
+          columns: [
+            { data: null, render: (data, type, row, meta) => meta.row + 1 },
+            { data: 'Fecha' },
+            { data: 'Nombre_Paciente', createdCell: makeEditableCell },
+            { data: 'Edad', createdCell: makeEditableCell },
+            { data: 'Sexo', createdCell: makeEditableCell },
+            { data: 'Medicamento_Dispositivo', createdCell: makeEditableCell },
+            { data: 'Tipo_Evento', createdCell: makeEditableCell },
+            { data: 'Gravedad', createdCell: makeEditableCell },
+            { data: 'Consecuencia', createdCell: makeEditableCell },
+            { data: 'Codigo_CIE11', createdCell: makeEditableCell },
+            { data: 'Observaciones', createdCell: makeEditableCell },
+            { data: null, orderable: false, searchable: false, defaultContent: '' }
+          ],
+          columnDefs: [
+            { targets: [0], width: '5%' },
+            { targets: -1, width: '9%', render: function () {
+                return '<button class="btn btn-sm btn-danger eliminar action-btn">Eliminar</button>';
+              }
+            }
+          ],
+          order: [[1, 'desc']],
+          pageLength: 10,
+          responsive: true,
+          language: {
+            url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
+          }
+        });
+
+        // Delegation: eliminar fila
+        $('#tablaRegistros tbody').on('click', 'button.eliminar', function () {
+          const row = tabla.row($(this).closest('tr'));
+          const data = row.data();
+          if (!data) return;
+          if (confirm('¿Eliminar este registro?')) {
+            // eliminar del storage
+            let registros = cargarRegistros();
+            // identificar por timestamp si existe; mejor: eliminar por coincidencia de todos los campos
+            registros = registros.filter(r => JSON.stringify(r) !== JSON.stringify(data));
+            guardarRegistros(registros);
+            row.remove().draw(false);
+            showAlert('Registro eliminado', 'warning', 2500);
+          }
+        });
+
+        // Guardar ediciones al perder foco (blur)
+        $('#tablaRegistros tbody').on('blur', 'td[contenteditable="true"]', function () {
+          const cell = tabla.cell(this);
+          const newVal = $(this).text().trim();
+          const colIdx = cell.index().column;
+          const colName = tabla.settings().init().columns[colIdx].data;
+          const row = tabla.row($(this).closest('tr'));
+          const rowData = row.data();
+          // actualizar valor
+          rowData[colName] = newVal;
+          row.data(rowData).invalidate();
+          // persistir
+          let registros = cargarRegistros();
+          // reemplazar la fila que coincida por JSON (simple)
+          let replaced = false;
+          registros = registros.map(r => {
+            if (!replaced && r._uid === rowData._uid) { replaced = true; return rowData; }
+            return r;
+          });
+          if (!replaced) {
+            // fallback: buscar por igualdad aproximada (nombre+fecha+medicamento)
+            registros = registros.map(r => {
+              if (!replaced && r.Nombre_Paciente === rowData.Nombre_Paciente && r.Fecha === rowData.Fecha && r.Medicamento_Dispositivo === rowData.Medicamento_Dispositivo) {
+                replaced = true; return rowData;
+              }
+              return r;
+            });
+          }
+          guardarRegistros(registros);
+          showAlert('Cambio guardado', 'success', 1200);
+        });
+
+      }
+
+      // Hace una celda editable excepto para la columna Fecha y Accion
+      function makeEditableCell(td, cellData, rowData, row, col) {
+        // columnas: Fecha (1) no editable, Nombre (2) editable, Edad (3) editable, Sexo editable...
+        // Sólo no hacemos editable la columna Fecha y la columna índice/acción
+        const colName = this.data;
+        // permitimos editable para todos excepto Fecha y Accion
+        if (colName !== 'Fecha') {
+          $(td).attr('contenteditable', 'true');
+          $(td).addClass('editable-cell');
+        }
+      }
+
+      // Genera un uid simple para rastrear filas
+      function uid() {
+        return 'u' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+      }
+
+      // Renderizar tabla con datos del storage
+      function renderTabla() {
+        const registros = cargarRegistros() || [];
+        // asegúrate de que cada registro tenga _uid
+        registros.forEach(r => { if (!r._uid) r._uid = uid(); });
+        guardarRegistros(registros);
+        tabla.clear().rows.add(registros).draw();
+      }
+
+      // Validaciones simples del formulario
+      function validarFormulario() {
+        const nombre = $('#nombre').val().trim();
+        const medicamento = $('#medicamento').val().trim();
+        if (!nombre) {
+          showAlert('El nombre del paciente es obligatorio.', 'danger', 3500);
+          return false;
+        }
+        if (!medicamento) {
+          showAlert('El medicamento o dispositivo es obligatorio.', 'danger', 3500);
+          return false;
+        }
+        return true;
+      }
+
+      // Evento Agregar
+      $('#btnAgregar').on('click', function () {
+        if (!validarFormulario()) return;
+        const nuevo = {
+          _uid: uid(),
+          Fecha: $('#fecha').val() || new Date().toISOString().slice(0,10),
+          Nombre_Paciente: $('#nombre').val().trim(),
+          Edad: $('#edad').val() ? Number($('#edad').val()) : '',
+          Sexo: $('#sexo').val(),
+          Medicamento_Dispositivo: $('#medicamento').val().trim(),
+          Tipo_Evento: $('#tipo_evento').val(),
+          Gravedad: $('#gravedad').val(),
+          Consecuencia: $('#consecuencia').val().trim(),
+          Codigo_CIE11: $('#cie11').val().trim(),
+          Observaciones: $('#observaciones').val().trim()
+        };
+        let registros = cargarRegistros();
+        registros.unshift(nuevo); // agregar al inicio
+        guardarRegistros(registros);
+        renderTabla();
+        // limpiar formulario
+        $('#nombre').val(''); $('#edad').val(''); $('#medicamento').val(''); $('#consecuencia').val('');
+        $('#cie11').val(''); $('#observaciones').val('');
+        showAlert('Registro agregado', 'success', 2000);
+      });
+
+      // Descargar a Excel usando SheetJS
+      $('#btnDescargar').on('click', function () {
+        const datos = cargarRegistros();
+        if (!datos || datos.length === 0) { showAlert('No hay registros para descargar.', 'info', 2500); return; }
+        // convertir a worksheet
+        // quitar _uid antes de exportar
+        const copia = datos.map(r => {
+          const c = Object.assign({}, r);
+          delete c._uid;
+          return c;
+        });
+        const ws = XLSX.utils.json_to_sheet(copia);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "EventosAdversos");
+        const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+        const hoy = new Date().toISOString().slice(0,10);
+        saveAs(new Blob([wbout], { type: "application/octet-stream" }), `eventos_adversos_${hoy}.xlsx`);
+      });
+
+      // Borrar todo con confirmación
+      $('#btnBorrarTodos').on('click', function () {
+        if (!confirm('¿Seguro que deseas eliminar todos los registros? Esta acción no se puede deshacer.')) return;
+        localStorage.removeItem(STORAGE_KEY);
+        renderTabla();
+        showAlert('Todos los registros han sido eliminados.', 'danger', 3000);
+      });
+
+      // Iniciar todo
+      $(document).ready(function () {
+        initTabla();
+        renderTabla();
+
+        // Permitir doble click en la celda Fecha para editar (por si acaso)
+        $('#tablaRegistros tbody').on('dblclick', 'td', function () {
+          const colIdx = tabla.cell(this).index().column;
+          const colName = tabla.settings().init().columns[colIdx].data;
+          if (colName === 'Fecha') {
+            // reemplazar con input date temporal
+            const current = $(this).text().trim();
+            $(this).html(`<input type="date" class="form-control form-control-sm" value="${current || new Date().toISOString().slice(0,10)}" />`);
+            $(this).find('input').focus().on('blur change', function () {
+              const val = $(this).val();
+              const cell = tabla.cell($(this).closest('td'));
+              const row = tabla.row($(this).closest('tr'));
+              const rowData = row.data();
+              rowData['Fecha'] = val;
+              row.data(rowData).invalidate();
+              // persistir cambio
+              let registros = cargarRegistros();
+              registros = registros.map(r => r._uid === rowData._uid ? rowData : r);
+              guardarRegistros(registros);
+              renderTabla();
+              showAlert('Fecha actualizada', 'success', 1200);
+            });
+          }
+        });
+
+      });
+
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Obtener una historia de usuario (sin duplicados exactos)</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: linear-gradient(135deg, #e8f0f8, #f4f7fa);
+    color: #2c3e50;
+  }
+
+  h1 {
+    color: #1a5276;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  label {
+    font-weight: 500;
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    color: #34495e;
+  }
+
+  input[type=file] {
+    padding: 8px;
+    border: 1px solid #ccd6dd;
+    border-radius: 6px;
+    background: #fff;
+    transition: 0.3s;
+    width: 100%;
+    max-width: 400px;
+  }
+
+  input[type=file]:hover {
+    border-color: #5dade2;
+    box-shadow: 0 0 8px rgba(93, 173, 226, 0.4);
+  }
+
+  button {
+    margin-top: 20px;
+    padding: 10px 18px;
+    font-size: 15px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  button:hover {
+    background: #2e86c1;
+    box-shadow: 0 0 10px rgba(46, 134, 193, 0.5);
+  }
+
+  #commonColumnsContainer {
+    margin-top: 20px;
+    padding: 10px;
+    background: #ebf5fb;
+    border: 1px solid #d6eaf8;
+    border-radius: 8px;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 20px;
+    background: white;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+
+  th, td {
+    border: 1px solid #ecf0f1;
+    padding: 10px;
+    text-align: left;
+  }
+
+  th {
+    background-color: #2980b9;
+    color: white;
+  }
+
+  tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+
+  #rowCount {
+    margin-top: 15px;
+    font-weight: bold;
+    color: #2c3e50;
+  }
+
+</style>
+</head>
+<body>
+
+<h1>📊 Generar Reporte (sin duplicados exactos)</h1>
+
+<label>Seleccione archivo CSV tabla 1:</label>
+<input type="file" id="file1" accept=".csv" />
+
+<label>Seleccione archivo CSV tabla 2:</label>
+<input type="file" id="file2" accept=".csv" />
+
+<button id="processBtn" disabled>Procesar tablas</button>
+
+<div id="commonColumnsContainer"></div>
+<div id="resultContainer"></div>
+<div id="rowCount"></div>
+
+<button id="downloadBtn" style="display:none;">📥 Descargar CSV combinado</button>
+
+<script>
+  let table1 = null;
+  let table2 = null;
+  let commonColumns = [];
+
+  function parseCSV(text) {
+    const lines = text.trim().split(/\r?\n/);
+    const headers = lines[0].split(',').map(h => h.trim());
+    const data = lines.slice(1).map(line => {
+      const values = line.split(',').map(v => v.trim());
+      let obj = {};
+      headers.forEach((h, i) => obj[h] = values[i] || '');
+      return obj;
+    });
+    return { headers, data };
+  }
+
+  function getCommonColumns(headers1, headers2) {
+    return headers1.filter(h => headers2.includes(h));
+  }
+
+  function rowKey(row, columns) {
+    return columns.map(col => (row[col] || '').toLowerCase()).join('||');
+  }
+
+  function combineTablesUnique(data1, data2, columns) {
+    const map = new Map();
+
+    function addRow(row) {
+      const key = rowKey(row, columns);
+      if (!map.has(key)) {
+        map.set(key, [row]);
+      } else {
+        const iguales = map.get(key).some(existingRow => {
+          return columns.every(col => (existingRow[col] || '') === (row[col] || ''));
+        });
+        if (!iguales) {
+          map.get(key).push(row);
+        }
+      }
+    }
+
+    data1.forEach(addRow);
+    data2.forEach(addRow);
+
+    let combined = [];
+    map.forEach(rows => {
+      combined = combined.concat(rows);
+    });
+
+    return combined;
+  }
+
+  function renderTable(data, columns) {
+    let html = '<table><thead><tr>';
+    columns.forEach(col => {
+      html += `<th>${col}</th>`;
+    });
+    html += '</tr></thead><tbody>';
+
+    data.forEach(row => {
+      html += '<tr>';
+      columns.forEach(col => {
+        html += `<td>${row[col]}</td>`;
+      });
+      html += '</tr>';
+    });
+
+    html += '</tbody></table>';
+    return html;
+  }
+
+  function downloadCSV(data, columns) {
+    let csv = columns.join(',') + '\n';
+    data.forEach(row => {
+      let rowArray = columns.map(col => {
+        let val = row[col] ? row[col].toString() : '';
+        if(val.includes(',') || val.includes('"')) {
+          val = `"${val.replace(/"/g, '""')}"`;
+        }
+        return val;
+      });
+      csv += rowArray.join(',') + '\n';
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'tabla_combinada.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  document.getElementById('file1').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      table1 = parseCSV(event.target.result);
+      checkReady();
+    };
+    reader.readAsText(file);
+  });
+
+  document.getElementById('file2').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      table2 = parseCSV(event.target.result);
+      checkReady();
+    };
+    reader.readAsText(file);
+  });
+
+  function checkReady() {
+    const btn = document.getElementById('processBtn');
+    if (table1 && table2) {
+      btn.disabled = false;
+      document.getElementById('commonColumnsContainer').innerHTML = '';
+      document.getElementById('resultContainer').innerHTML = '';
+      document.getElementById('rowCount').innerHTML = '';
+      document.getElementById('downloadBtn').style.display = 'none';
+    } else {
+      btn.disabled = true;
+    }
+  }
+
+  document.getElementById('processBtn').addEventListener('click', () => {
+    commonColumns = getCommonColumns(table1.headers, table2.headers);
+    if(commonColumns.length === 0) {
+      alert('No hay columnas comunes entre las dos tablas.');
+      return;
+    }
+    const container = document.getElementById('commonColumnsContainer');
+    container.innerHTML = `<b>Columnas comunes detectadas (${commonColumns.length}):</b> ${commonColumns.join(', ')}`;
+
+    const combinedData = combineTablesUnique(table1.data, table2.data, commonColumns);
+
+    const resultDiv = document.getElementById('resultContainer');
+    resultDiv.innerHTML = renderTable(combinedData, commonColumns);
+
+    const rowCountDiv = document.getElementById('rowCount');
+    rowCountDiv.textContent = `Filas resultantes: ${combinedData.length}`;
+
+    const downloadBtn = document.getElementById('downloadBtn');
+    downloadBtn.style.display = 'inline-block';
+    downloadBtn.onclick = () => downloadCSV(combinedData, commonColumns);
+  });
+</script>
+
+</body>
+</html>
