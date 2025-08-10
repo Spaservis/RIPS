@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Reporte RIPS - Procedimientos</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f3f7fa;
+    margin: 0; padding: 20px;
+    color: #2c3e50;
+  }
+  h1, h2 {
+    text-align: center;
+    color: #0074b8;
+  }
+  form {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #ffffff;
+    padding: 25px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.08);
+    border-radius: 8px;
+  }
+  label {
+    display: block;
+    margin: 15px 0 5px 0;
+    font-weight: bold;
+  }
+  input[type="text"],
+  input[type="date"],
+  input[type="number"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #a9c1d9;
+    border-radius: 4px;
+    font-size: 1em;
+    box-sizing: border-box;
+  }
+  textarea {
+    resize: vertical;
+  }
+  button, #exportBtn, #limpiarBtn {
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    font-size: 1.1em;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-top: 20px;
+    display: block;
+    width: 100%;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    transition: background-color 0.3s ease;
+  }
+  button:hover, #exportBtn:hover, #limpiarBtn:hover {
+    filter: brightness(90%);
+  }
+  #exportBtn {
+    background-color: #0074b8;
+  }
+  #limpiarBtn {
+    background-color: #c0392b;
+  }
+  #tablaRegistros {
+    max-width: 900px;
+    margin: 30px auto;
+    display: none;
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.08);
+    overflow-x: auto;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 1100px;
+  }
+  th, td {
+    padding: 8px 10px;
+    border: 1px solid #a9c1d9;
+    text-align: left;
+    white-space: nowrap;
+  }
+  th {
+    background-color: #0074b8;
+    color: white;
+  }
+  #mensajeExito {
+    max-width: 900px;
+    margin: 10px auto 0 auto;
+    padding: 12px;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+    border-radius: 5px;
+    display: none;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<h1>Registrar un procedimiento</h1>
+
+<form id="ripsForm" onsubmit="return generarReporte(event)">
+
+  <label for="numFactura">Número de la Factura:</label>
+  <input type="text" id="numFactura" name="numFactura" required maxlength="30" />
+
+  <label for="codigoPrestador">Código del Prestador de Servicios de Salud:</label>
+  <input type="text" id="codigoPrestador" name="codigoPrestador" required maxlength="20" />
+
+  <label for="tipoIdentificacion">Tipo de Identificación del Usuario:</label>
+  <select id="tipoIdentificacion" name="tipoIdentificacion" required>
+    <option value="">-- Seleccione --</option>
+    <option value="CC">Cédula de Ciudadanía</option>
+    <option value="TI">Tarjeta de Identidad</option>
+    <option value="CE">Cédula de Extranjería</option>
+    <option value="PAS">Pasaporte</option>
+    <option value="OTRO">Otro</option>
+  </select>
+
+  <label for="numIdUsuario">Número de Identificación del Usuario en el Sistema:</label>
+  <input type="text" id="numIdUsuario" name="numIdUsuario" required maxlength="30" />
+
+  <label for="fechaProcedimiento">Fecha del Procedimiento:</label>
+  <input type="date" id="fechaProcedimiento" name="fechaProcedimiento" required />
+
+  <label for="numAutorizacion">Número de Autorización:</label>
+  <input type="text" id="numAutorizacion" name="numAutorizacion" maxlength="30" />
+
+  <label for="codigoProcedimiento">Código del Procedimiento:</label>
+  <input type="text" id="codigoProcedimiento" name="codigoProcedimiento" required maxlength="20" />
+
+  <label for="ambitoRealizacion">Ámbito de Realización del Procedimiento:</label>
+  <input type="text" id="ambitoRealizacion" name="ambitoRealizacion" maxlength="50" />
+
+  <label for="finalidadProcedimiento">Finalidad del Procedimiento:</label>
+  <input type="text" id="finalidadProcedimiento" name="finalidadProcedimiento" maxlength="100" />
+
+  <label for="personalAtiende">Personal que Atiende:</label>
+  <input type="text" id="personalAtiende" name="personalAtiende" maxlength="50" />
+
+  <label for="diagnosticoPrincipal">Diagnóstico Principal:</label>
+  <input type="text" id="diagnosticoPrincipal" name="diagnosticoPrincipal" maxlength="20" />
+
+  <label for="diagnosticoRelacionado">Diagnóstico Relacionado:</label>
+  <input type="text" id="diagnosticoRelacionado" name="diagnosticoRelacionado" maxlength="20" />
+
+  <label for="complicacion">Complicación:</label>
+  <input type="text" id="complicacion" name="complicacion" maxlength="100" />
+
+  <label for="formaRealizacion">Forma de Realización del Acto Quirúrgico:</label>
+  <input type="text" id="formaRealizacion" name="formaRealizacion" maxlength="100" />
+
+  <label for="valorProcedimiento">Valor del Procedimiento (COP):</label>
+  <input type="number" id="valorProcedimiento" name="valorProcedimiento" required min="0" step="0.01" />
+
+  <button type="submit">Agregar Registro</button>
+</form>
+
+<button id="exportBtn" type="button" style="display:none;">Exportar Registros a CSV</button>
+<button id="limpiarBtn" type="button" style="display:none;">Limpiar Registros</button>
+
+<div id="mensajeExito">Registro agregado correctamente.</div>
+
+<div id="tablaRegistros" style="display:none;">
+  <h2>Registros Ingresados</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Número Factura</th>
+        <th>Código Prestador</th>
+        <th>Tipo ID Usuario</th>
+        <th>Número ID Usuario</th>
+        <th>Fecha Procedimiento</th>
+        <th>Número Autorización</th>
+        <th>Código Procedimiento</th>
+        <th>Ámbito</th>
+        <th>Finalidad</th>
+        <th>Personal Atiende</th>
+        <th>Dx Principal</th>
+        <th>Dx Relacionado</th>
+        <th>Complicación</th>
+        <th>Forma Realización</th>
+        <th>Valor Procedimiento</th>
+      </tr>
+    </thead>
+    <tbody id="tbodyRegistros"></tbody>
+  </table>
+</div>
+
+<script>
+  const registros = [];
+  const limpiarBtn = document.getElementById('limpiarBtn');
+
+  function agregarRegistro(data) {
+    registros.push(data);
+  }
+
+  function actualizarTabla() {
+    const tbody = document.getElementById('tbodyRegistros');
+    tbody.innerHTML = '';
+    registros.forEach(reg => {
+      const fila = document.createElement('tr');
+      fila.innerHTML = `
+        <td>${reg.numFactura}</td>
+        <td>${reg.codigoPrestador}</td>
+        <td>${reg.tipoIdentificacion}</td>
+        <td>${reg.numIdUsuario}</td>
+        <td>${reg.fechaProcedimiento}</td>
+        <td>${reg.numAutorizacion}</td>
+        <td>${reg.codigoProcedimiento}</td>
+        <td>${reg.ambitoRealizacion}</td>
+        <td>${reg.finalidadProcedimiento}</td>
+        <td>${reg.personalAtiende}</td>
+        <td>${reg.diagnosticoPrincipal}</td>
+        <td>${reg.diagnosticoRelacionado}</td>
+        <td>${reg.complicacion}</td>
+        <td>${reg.formaRealizacion}</td>
+        <td>${parseFloat(reg.valorProcedimiento).toFixed(2)}</td>
+      `;
+      tbody.appendChild(fila);
+    });
+
+    const tabla = document.getElementById('tablaRegistros');
+    const btnExport = document.getElementById('exportBtn');
+
+    if (registros.length > 0) {
+      tabla.style.display = 'block';
+      btnExport.style.display = 'block';
+      limpiarBtn.style.display = 'block';
+    } else {
+      tabla.style.display = 'none';
+      btnExport.style.display = 'none';
+      limpiarBtn.style.display = 'none';
+    }
+  }
+
+  function descargarCSV() {
+    if (registros.length === 0) {
+      alert('No hay registros para exportar.');
+      return;
+    }
+
+    const encabezados = [
+      'Número Factura',
+      'Código Prestador',
+      'Tipo ID Usuario',
+      'Número ID Usuario',
+      'Fecha Procedimiento',
+      'Número Autorización',
+      'Código Procedimiento',
+      'Ámbito',
+      'Finalidad',
+      'Personal Atiende',
+      'Dx Principal',
+      'Dx Relacionado',
+      'Complicación',
+      'Forma Realización',
+      'Valor Procedimiento'
+    ];
+
+    const filas = registros.map(reg => [
+      `"${reg.numFactura}"`,
+      `"${reg.codigoPrestador}"`,
+      `"${reg.tipoIdentificacion}"`,
+      `"${reg.numIdUsuario}"`,
+      reg.fechaProcedimiento,
+      `"${reg.numAutorizacion}"`,
+      `"${reg.codigoProcedimiento}"`,
+      `"${reg.ambitoRealizacion}"`,
+      `"${reg.finalidadProcedimiento}"`,
+      `"${reg.personalAtiende}"`,
+      `"${reg.diagnosticoPrincipal}"`,
+      `"${reg.diagnosticoRelacionado}"`,
+      `"${reg.complicacion}"`,
+      `"${reg.formaRealizacion}"`,
+      parseFloat(reg.valorProcedimiento).toFixed(2)
+    ].join(','));
+
+    const csvContenido = [encabezados.join(','), ...filas].join('\r\n');
+    const blob = new Blob([csvContenido], {type: 'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'registros_procedimientos.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function limpiarFormulario() {
+    document.getElementById('ripsForm').reset();
+  }
+
+  function mostrarMensajeExito() {
+    const mensaje = document.getElementById('mensajeExito');
+    mensaje.style.display = 'block';
+    setTimeout(() => {
+      mensaje.style.display = 'none';
+    }, 2500);
+  }
+
+  function limpiarRegistros() {
+    if (confirm('¿Estás seguro de que quieres eliminar todos los registros?')) {
+      registros.length = 0;
+      actualizarTabla();
+    }
+  }
+
+  function generarReporte(event) {
+    event.preventDefault();
+    const data = {
+      numFactura: document.getElementById('numFactura').value.trim(),
+      codigoPrestador: document.getElementById('codigoPrestador').value.trim(),
+      tipoIdentificacion: document.getElementById('tipoIdentificacion').value,
+      numIdUsuario: document.getElementById('numIdUsuario').value.trim(),
+      fechaProcedimiento: document.getElementById('fechaProcedimiento').value,
+      numAutorizacion: document.getElementById('numAutorizacion').value.trim(),
+      codigoProcedimiento: document.getElementById('codigoProcedimiento').value.trim(),
+      ambitoRealizacion: document.getElementById('ambitoRealizacion').value.trim(),
+      finalidadProcedimiento: document.getElementById('finalidadProcedimiento').value.trim(),
+      personalAtiende: document.getElementById('personalAtiende').value.trim(),
+      diagnosticoPrincipal: document.getElementById('diagnosticoPrincipal').value.trim(),
+      diagnosticoRelacionado: document.getElementById('diagnosticoRelacionado').value.trim(),
+      complicacion: document.getElementById('complicacion').value.trim(),
+      formaRealizacion: document.getElementById('formaRealizacion').value.trim(),
+      valorProcedimiento: document.getElementById('valorProcedimiento').value
+    };
+
+    agregarRegistro(data);
+    actualizarTabla();
+    limpiarFormulario();
+    mostrarMensajeExito();
+    return false;
+  }
+
+  document.getElementById('exportBtn').addEventListener('click', descargarCSV);
+  limpiarBtn.addEventListener('click', limpiarRegistros);
+</script>
+
+</body>
+</html>
