@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Lector de Word en Voz Alta</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background-color: #f7f7f7; }
+    h1 { color: #333; }
+    #output { margin-top: 20px; padding: 15px; background-color: white; border: 1px solid #ccc; min-height: 200px; }
+    button { margin-top: 10px; padding: 10px; font-size: 16px; }
+  </style>
+</head>
+<body>
+  <h1>Lector de Documento Word en Voz Alta</h1>
+  <input type="file" id="upload" accept=".docx" />
+  <div id="output">Aquí se mostrará el contenido del documento...</div>
+  <button id="readBtn">🔊 Leer en voz alta</button>
+  <button id="stopBtn">⛔ Detener lectura</button>
+
+  <script>
+    let textoCompleto = "";
+
+    document.getElementById("upload").addEventListener("change", function(event) {
+      const reader = new FileReader();
+
+      reader.onload = function(event) {
+        mammoth.extractRawText({ arrayBuffer: event.target.result })
+          .then(function(result) {
+            textoCompleto = result.value;
+            document.getElementById("output").innerText = textoCompleto;
+          })
+          .catch(function(err) {
+            console.error("Error al leer el documento:", err);
+            alert("No se pudo leer el archivo. Asegúrate de que sea un .docx válido.");
+          });
+      };
+
+      reader.readAsArrayBuffer(event.target.files[0]);
+    });
+
+    let speech = window.speechSynthesis;
+    let utterance;
+
+    document.getElementById("readBtn").addEventListener("click", function() {
+      if (speech.speaking) {
+        speech.cancel();
+      }
+      utterance = new SpeechSynthesisUtterance(textoCompleto);
+      utterance.lang = "es-ES"; // Español
+      speech.speak(utterance);
+    });
+
+    document.getElementById("stopBtn").addEventListener("click", function() {
+      speech.cancel();
+    });
+  </script>
+</body>
+</html>
