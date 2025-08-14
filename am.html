@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Reporte RIPS - Medicamentos</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f3f7fa;
+    margin: 0; padding: 20px;
+    color: #2c3e50;
+  }
+  h1 {
+    text-align: center;
+    color: #0074b8;
+  }
+  form {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #ffffff;
+    padding: 25px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.08);
+    border-radius: 8px;
+  }
+  label {
+    display: block;
+    margin: 15px 0 5px 0;
+    font-weight: bold;
+  }
+  input[type="text"],
+  input[type="number"] {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #a9c1d9;
+    border-radius: 4px;
+    font-size: 1em;
+    box-sizing: border-box;
+  }
+  button {
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    font-size: 1.1em;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-top: 20px;
+    display: block;
+    width: 100%;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #0074b8;
+  }
+</style>
+</head>
+<body>
+
+<h1>Registro de Medicamentos</h1>
+
+<form id="ripsForm" onsubmit="return generarReporte(event)">
+
+  <label for="numFactura">Número de la Factura:</label>
+  <input type="text" id="numFactura" name="numFactura" required maxlength="30" />
+
+  <label for="codigoPrestador">Código del Prestador de Servicios de Salud:</label>
+  <input type="text" id="codigoPrestador" name="codigoPrestador" required maxlength="20" />
+
+  <label for="tipoDocumento">Tipo de Identificación del Usuario:</label>
+  <input type="text" id="tipoDocumento" name="tipoDocumento" required maxlength="10" />
+
+  <label for="numIdUsuario">Número de Identificación del Usuario en el Sistema:</label>
+  <input type="text" id="numIdUsuario" name="numIdUsuario" required maxlength="30" />
+
+  <label for="numAutorizacion">Número de Autorización:</label>
+  <input type="text" id="numAutorizacion" name="numAutorizacion" maxlength="30" />
+
+  <label for="codigoMedicamento">Código del Medicamento:</label>
+  <input type="text" id="codigoMedicamento" name="codigoMedicamento" required maxlength="30" />
+
+  <label for="tipoMedicamento">Tipo de Medicamento:</label>
+  <input type="text" id="tipoMedicamento" name="tipoMedicamento" maxlength="50" />
+
+  <label for="nombreGenerico">Nombre Genérico del Medicamento:</label>
+  <input type="text" id="nombreGenerico" name="nombreGenerico" maxlength="100" />
+
+  <label for="formaFarmaceutica">Forma Farmacéutica:</label>
+  <input type="text" id="formaFarmaceutica" name="formaFarmaceutica" maxlength="50" />
+
+  <label for="concentracion">Concentración del Medicamento:</label>
+  <input type="text" id="concentracion" name="concentracion" maxlength="50" />
+
+  <label for="unidadMedida">Unidad de Medida del Medicamento:</label>
+  <input type="text" id="unidadMedida" name="unidadMedida" maxlength="20" />
+
+  <label for="numUnidades">Número de Unidades:</label>
+  <input type="number" id="numUnidades" name="numUnidades" min="1" />
+
+  <label for="valorUnitario">Valor Unitario del Medicamento:</label>
+  <input type="number" id="valorUnitario" name="valorUnitario" min="0" step="0.01" />
+
+  <label for="valorTotal">Valor Total del Medicamento:</label>
+  <input type="number" id="valorTotal" name="valorTotal" min="0" step="0.01" />
+
+  <button type="submit">Agregar Registro</button>
+</form>
+
+<script>
+  const registros = [];
+
+  function agregarRegistro(data) {
+    registros.push(data);
+  }
+
+  function generarReporte(event) {
+    event.preventDefault();
+    const data = {
+      numFactura: document.getElementById('numFactura').value.trim(),
+      codigoPrestador: document.getElementById('codigoPrestador').value.trim(),
+      tipoDocumento: document.getElementById('tipoDocumento').value.trim(),
+      numIdUsuario: document.getElementById('numIdUsuario').value.trim(),
+      numAutorizacion: document.getElementById('numAutorizacion').value.trim(),
+      codigoMedicamento: document.getElementById('codigoMedicamento').value.trim(),
+      tipoMedicamento: document.getElementById('tipoMedicamento').value.trim(),
+      nombreGenerico: document.getElementById('nombreGenerico').value.trim(),
+      formaFarmaceutica: document.getElementById('formaFarmaceutica').value.trim(),
+      concentracion: document.getElementById('concentracion').value.trim(),
+      unidadMedida: document.getElementById('unidadMedida').value.trim(),
+      numUnidades: document.getElementById('numUnidades').value,
+      valorUnitario: document.getElementById('valorUnitario').value,
+      valorTotal: document.getElementById('valorTotal').value
+    };
+
+    agregarRegistro(data);
+    console.log(registros);
+    document.getElementById('ripsForm').reset();
+    alert("Registro agregado correctamente.");
+  }
+</script>
+
+</body>
+</html>
