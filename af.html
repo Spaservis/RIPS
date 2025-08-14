@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Reporte RIPS - Captura de Datos</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #f9fafb; margin: 0; padding: 20px; color: #333; }
+  h1 { text-align: center; color: #005b96; }
+  form { max-width: 600px; margin: auto; background: #fff; padding: 25px; box-shadow: 0 0 8px rgba(0,0,0,0.1); border-radius: 8px; }
+  label { display: block; margin: 15px 0 5px; font-weight: bold; }
+  input[type="text"], input[type="date"], input[type="number"] {
+    width: 100%; padding: 8px 10px; border: 1px solid #bbb; border-radius: 4px; font-size: 1em;
+  }
+  button { color: white; border: none; padding: 12px 25px; font-size: 1.1em; cursor: pointer; border-radius: 5px; margin-top: 20px; display: block; width: 100%; }
+  #exportBtn { background-color: #005b96; }
+  #limpiarBtn { background-color: #c82333; margin-top: 10px; }
+  table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+  th, td { padding: 8px; border: 1px solid #bbb; text-align: left; }
+  th { background-color: #005b96; color: white; }
+  #mensajeExito { display: none; text-align: center; margin-top: 10px; padding: 10px; background: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 5px; }
+</style>
+</head>
+<body>
+
+<h1>Captura de Datos RIPS</h1>
+
+<form id="ripsForm" onsubmit="return generarReporte(event)">
+
+  <label for="codigoPrestador">Código del prestador de servicios de salud:</label>
+  <input type="text" id="codigoPrestador" name="codigoPrestador" required maxlength="30">
+
+  <label for="razonSocial">Razón social o apellidos y nombre del prestador de servicios de salud:</label>
+  <input type="text" id="razonSocial" name="razonSocial" required maxlength="100">
+
+  <label for="tipoIdPrestador">Tipo de identificación del prestador de servicios de salud:</label>
+  <input type="text" id="tipoIdPrestador" name="tipoIdPrestador" required maxlength="5">
+
+  <label for="numeroIdPrestador">Número de identificación del prestador:</label>
+  <input type="text" id="numeroIdPrestador" name="numeroIdPrestador" required maxlength="20">
+
+  <label for="numeroFactura">Número de la factura:</label>
+  <input type="text" id="numeroFactura" name="numeroFactura" required maxlength="20">
+
+  <label for="fechaExpedicion">Fecha de expedición de la factura:</label>
+  <input type="date" id="fechaExpedicion" name="fechaExpedicion" required>
+
+  <label for="fechaInicio">Fecha de inicio:</label>
+  <input type="date" id="fechaInicio" name="fechaInicio" required>
+
+  <label for="fechaFinal">Fecha final:</label>
+  <input type="date" id="fechaFinal" name="fechaFinal" required>
+
+  <label for="codigoEntidad">Código entidad administradora:</label>
+  <input type="text" id="codigoEntidad" name="codigoEntidad" required maxlength="20">
+
+  <label for="nombreEntidad">Nombre entidad administradora:</label>
+  <input type="text" id="nombreEntidad" name="nombreEntidad" required maxlength="100">
+
+  <label for="numeroContrato">Número del contrato:</label>
+  <input type="text" id="numeroContrato" name="numeroContrato" required maxlength="20">
+
+  <label for="planBeneficios">Plan de beneficios:</label>
+  <input type="text" id="planBeneficios" name="planBeneficios" required maxlength="50">
+
+  <label for="numeroPoliza">Número de la póliza:</label>
+  <input type="text" id="numeroPoliza" name="numeroPoliza" maxlength="30">
+
+  <label for="valorCopago">Valor total del pago compartido (copago):</label>
+  <input type="number" id="valorCopago" name="valorCopago" required min="0" step="0.01">
+
+  <label for="valorComision">Valor de la comisión:</label>
+  <input type="number" id="valorComision" name="valorComision" required min="0" step="0.01">
+
+  <label for="valorDescuentos">Valor total de descuentos:</label>
+  <input type="number" id="valorDescuentos" name="valorDescuentos" required min="0" step="0.01">
+
+  <label for="valorNetoPagar">Valor neto a pagar por la entidad contratante:</label>
+  <input type="number" id="valorNetoPagar" name="valorNetoPagar" required min="0" step="0.01">
+
+  <button type="submit">Agregar Registro</button>
+</form>
+
+<button id="exportBtn" style="display:none;">Exportar a CSV</button>
+<button id="limpiarBtn" style="display:none;">Limpiar Registros</button>
+
+<div id="mensajeExito">Registro agregado correctamente.</div>
+
+<div id="tablaRegistros" style="display:none;">
+  <h2>Registros Ingresados</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Código Prestador</th>
+        <th>Razón Social / Nombre</th>
+        <th>Tipo ID Prestador</th>
+        <th>Número ID Prestador</th>
+        <th>Número Factura</th>
+        <th>Fecha Expedición</th>
+        <th>Fecha Inicio</th>
+        <th>Fecha Final</th>
+        <th>Código Entidad</th>
+        <th>Nombre Entidad</th>
+        <th>Número Contrato</th>
+        <th>Plan Beneficios</th>
+        <th>Número Póliza</th>
+        <th>Valor Copago</th>
+        <th>Valor Comisión</th>
+        <th>Valor Descuentos</th>
+        <th>Valor Neto Pagar</th>
+      </tr>
+    </thead>
+    <tbody id="tbodyRegistros"></tbody>
+  </table>
+</div>
+
+<script>
+  const registros = [];
+  const exportBtn = document.getElementById('exportBtn');
+  const limpiarBtn = document.getElementById('limpiarBtn');
+
+  function agregarRegistro(data) {
+    registros.push(data);
+  }
+
+  function actualizarTabla() {
+    const tbody = document.getElementById('tbodyRegistros');
+    tbody.innerHTML = '';
+    registros.forEach(reg => {
+      const fila = document.createElement('tr');
+      fila.innerHTML = `
+        <td>${reg.codigoPrestador}</td>
+        <td>${reg.razonSocial}</td>
+        <td>${reg.tipoIdPrestador}</td>
+        <td>${reg.numeroIdPrestador}</td>
+        <td>${reg.numeroFactura}</td>
+        <td>${reg.fechaExpedicion}</td>
+        <td>${reg.fechaInicio}</td>
+        <td>${reg.fechaFinal}</td>
+        <td>${reg.codigoEntidad}</td>
+        <td>${reg.nombreEntidad}</td>
+        <td>${reg.numeroContrato}</td>
+        <td>${reg.planBeneficios}</td>
+        <td>${reg.numeroPoliza}</td>
+        <td>${reg.valorCopago}</td>
+        <td>${reg.valorComision}</td>
+        <td>${reg.valorDescuentos}</td>
+        <td>${reg.valorNetoPagar}</td>
+      `;
+      tbody.appendChild(fila);
+    });
+
+    document.getElementById('tablaRegistros').style.display = registros.length ? 'block' : 'none';
+    exportBtn.style.display = registros.length ? 'block' : 'none';
+    limpiarBtn.style.display = registros.length ? 'block' : 'none';
+  }
+
+  function generarReporte(event) {
+    event.preventDefault();
+    const data = {
+      codigoPrestador: codigoPrestador.value.trim(),
+      razonSocial: razonSocial.value.trim(),
+      tipoIdPrestador: tipoIdPrestador.value.trim(),
+      numeroIdPrestador: numeroIdPrestador.value.trim(),
+      numeroFactura: numeroFactura.value.trim(),
+      fechaExpedicion: fechaExpedicion.value,
+      fechaInicio: fechaInicio.value,
+      fechaFinal: fechaFinal.value,
+      codigoEntidad: codigoEntidad.value.trim(),
+      nombreEntidad: nombreEntidad.value.trim(),
+      numeroContrato: numeroContrato.value.trim(),
+      planBeneficios: planBeneficios.value.trim(),
+      numeroPoliza: numeroPoliza.value.trim(),
+      valorCopago: valorCopago.value,
+      valorComision: valorComision.value,
+      valorDescuentos: valorDescuentos.value,
+      valorNetoPagar: valorNetoPagar.value
+    };
+    agregarRegistro(data);
+    actualizarTabla();
+    ripsForm.reset();
+    mensajeExito.style.display = 'block';
+    setTimeout(() => mensajeExito.style.display = 'none', 2000);
+  }
+
+  exportBtn.addEventListener('click', () => {
+    if (!registros.length) return alert("No hay registros");
+    const encabezados = Object.keys(registros[0]);
+    const filas = registros.map(r => Object.values(r));
+    let csv = [encabezados.join(",")];
+    filas.forEach(f => csv.push(f.join(",")));
+    const blob = new Blob([csv.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "registros_rips.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  limpiarBtn.addEventListener('click', () => {
+    if (confirm("¿Eliminar todos los registros?")) {
+      registros.length = 0;
+      actualizarTabla();
+    }
+  });
+</script>
+
+</body>
+</html>

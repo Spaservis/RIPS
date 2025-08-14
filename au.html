@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Reporte RIPS - Observación</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f3f7fa;
+    margin: 0; padding: 20px;
+    color: #2c3e50;
+  }
+  h1, h2 {
+    text-align: center;
+    color: #0074b8;
+  }
+  form {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #ffffff;
+    padding: 25px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.08);
+    border-radius: 8px;
+  }
+  label {
+    display: block;
+    margin: 15px 0 5px 0;
+    font-weight: bold;
+  }
+  input[type="text"],
+  input[type="date"],
+  input[type="time"],
+  input[type="number"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #a9c1d9;
+    border-radius: 4px;
+    font-size: 1em;
+    box-sizing: border-box;
+  }
+  textarea {
+    resize: vertical;
+  }
+  button, #exportBtn, #limpiarBtn {
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    font-size: 1.1em;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-top: 20px;
+    display: block;
+    width: 100%;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    transition: background-color 0.3s ease;
+  }
+  button:hover, #exportBtn:hover, #limpiarBtn:hover {
+    filter: brightness(90%);
+  }
+  #exportBtn {
+    background-color: #0074b8;
+  }
+  #limpiarBtn {
+    background-color: #c0392b;
+  }
+  #tablaRegistros {
+    max-width: 900px;
+    margin: 30px auto;
+    display: none;
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.08);
+    overflow-x: auto;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 1300px;
+  }
+  th, td {
+    padding: 8px 10px;
+    border: 1px solid #a9c1d9;
+    text-align: left;
+    white-space: nowrap;
+  }
+  th {
+    background-color: #0074b8;
+    color: white;
+  }
+  #mensajeExito {
+    max-width: 900px;
+    margin: 10px auto 0 auto;
+    padding: 12px;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+    border-radius: 5px;
+    display: none;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<h1>Registrar observación</h1>
+
+<form id="ripsForm" onsubmit="return generarReporte(event)">
+
+  <label for="numFactura">Número de la Factura:</label>
+  <input type="text" id="numFactura" name="numFactura" required maxlength="30" />
+
+  <label for="codigoPrestador">Código del Prestador de Servicios de Salud:</label>
+  <input type="text" id="codigoPrestador" name="codigoPrestador" required maxlength="20" />
+
+  <label for="tipoIdentificacion">Tipo de Identificación del Usuario:</label>
+  <select id="tipoIdentificacion" name="tipoIdentificacion" required>
+    <option value="">-- Seleccione --</option>
+    <option value="CC">Cédula de Ciudadanía</option>
+    <option value="TI">Tarjeta de Identidad</option>
+    <option value="CE">Cédula de Extranjería</option>
+    <option value="PAS">Pasaporte</option>
+    <option value="OTRO">Otro</option>
+  </select>
+
+  <label for="numIdUsuario">Número de Identificación del Usuario en el Sistema:</label>
+  <input type="text" id="numIdUsuario" name="numIdUsuario" required maxlength="30" />
+
+  <label for="fechaIngresoObs">Fecha de Ingreso a Observación:</label>
+  <input type="date" id="fechaIngresoObs" name="fechaIngresoObs" required />
+
+  <label for="horaIngresoObs">Hora de Ingreso a Observación:</label>
+  <input type="time" id="horaIngresoObs" name="horaIngresoObs" required />
+
+  <label for="numAutorizacion">Número de Autorización:</label>
+  <input type="text" id="numAutorizacion" name="numAutorizacion" maxlength="30" />
+
+  <label for="causaExterna">Causa Externa:</label>
+  <input type="text" id="causaExterna" name="causaExterna" maxlength="100" />
+
+  <label for="diagnosticoSalida">Diagnóstico a la Salida:</label>
+  <input type="text" id="diagnosticoSalida" name="diagnosticoSalida" maxlength="20" />
+
+  <label for="diagnosticoRel1">Diagnóstico Relacionado Nro. 1:</label>
+  <input type="text" id="diagnosticoRel1" name="diagnosticoRel1" maxlength="20" />
+
+  <label for="diagnosticoRel2">Diagnóstico Relacionado Nro. 2:</label>
+  <input type="text" id="diagnosticoRel2" name="diagnosticoRel2" maxlength="20" />
+
+  <label for="diagnosticoRel3">Diagnóstico Relacionado Nro. 3:</label>
+  <input type="text" id="diagnosticoRel3" name="diagnosticoRel3" maxlength="20" />
+
+  <label for="destinoSalida">Destino del Usuario a la Salida:</label>
+  <input type="text" id="destinoSalida" name="destinoSalida" maxlength="100" />
+
+  <label for="estadoSalida">Estado a la Salida:</label>
+  <input type="text" id="estadoSalida" name="estadoSalida" maxlength="50" />
+
+  <label for="causaMuerteUrg">Causa Básica de Muerte en Urgencias:</label>
+  <input type="text" id="causaMuerteUrg" name="causaMuerteUrg" maxlength="100" />
+
+  <label for="fechaSalidaObs">Fecha de la Salida:</label>
+  <input type="date" id="fechaSalidaObs" name="fechaSalidaObs" />
+
+  <label for="horaSalidaObs">Hora de la Salida:</label>
+  <input type="time" id="horaSalidaObs" name="horaSalidaObs" />
+
+  <button type="submit">Agregar Registro</button>
+</form>
+
+<button id="exportBtn" type="button" style="display:none;">Exportar Registros a CSV</button>
+<button id="limpiarBtn" type="button" style="display:none;">Limpiar Registros</button>
+
+<div id="mensajeExito">Registro agregado correctamente.</div>
+
+<div id="tablaRegistros" style="display:none;">
+  <h2>Registros Ingresados</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Número Factura</th>
+        <th>Código Prestador</th>
+        <th>Tipo ID Usuario</th>
+        <th>Número ID Usuario</th>
+        <th>Fecha Ingreso Obs.</th>
+        <th>Hora Ingreso Obs.</th>
+        <th>Número Autorización</th>
+        <th>Causa Externa</th>
+        <th>Dx Salida</th>
+        <th>Dx Rel 1</th>
+        <th>Dx Rel 2</th>
+        <th>Dx Rel 3</th>
+        <th>Destino Salida</th>
+        <th>Estado Salida</th>
+        <th>Causa Muerte Urg.</th>
+        <th>Fecha Salida Obs.</th>
+        <th>Hora Salida Obs.</th>
+      </tr>
+    </thead>
+    <tbody id="tbodyRegistros"></tbody>
+  </table>
+</div>
+
+<script>
+  const registros = [];
+  const limpiarBtn = document.getElementById('limpiarBtn');
+
+  function agregarRegistro(data) {
+    registros.push(data);
+  }
+
+  function actualizarTabla() {
+    const tbody = document.getElementById('tbodyRegistros');
+    tbody.innerHTML = '';
+    registros.forEach(reg => {
+      const fila = document.createElement('tr');
+      fila.innerHTML = `
+        <td>${reg.numFactura}</td>
+        <td>${reg.codigoPrestador}</td>
+        <td>${reg.tipoIdentificacion}</td>
+        <td>${reg.numIdUsuario}</td>
+        <td>${reg.fechaIngresoObs}</td>
+        <td>${reg.horaIngresoObs}</td>
+        <td>${reg.numAutorizacion}</td>
+        <td>${reg.causaExterna}</td>
+        <td>${reg.diagnosticoSalida}</td>
+        <td>${reg.diagnosticoRel1}</td>
+        <td>${reg.diagnosticoRel2}</td>
+        <td>${reg.diagnosticoRel3}</td>
+        <td>${reg.destinoSalida}</td>
+        <td>${reg.estadoSalida}</td>
+        <td>${reg.causaMuerteUrg}</td>
+        <td>${reg.fechaSalidaObs}</td>
+        <td>${reg.horaSalidaObs}</td>
+      `;
+      tbody.appendChild(fila);
+    });
+
+    const tabla = document.getElementById('tablaRegistros');
+    const btnExport = document.getElementById('exportBtn');
+
+    if (registros.length > 0) {
+      tabla.style.display = 'block';
+      btnExport.style.display = 'block';
+      limpiarBtn.style.display = 'block';
+    } else {
+      tabla.style.display = 'none';
+      btnExport.style.display = 'none';
+      limpiarBtn.style.display = 'none';
+    }
+  }
+
+  function descargarCSV() {
+    if (registros.length === 0) {
+      alert('No hay registros para exportar.');
+      return;
+    }
+
+    const encabezados = [
+      'Número Factura',
+      'Código Prestador',
+      'Tipo ID Usuario',
+      'Número ID Usuario',
+      'Fecha Ingreso Obs.',
+      'Hora Ingreso Obs.',
+      'Número Autorización',
+      'Causa Externa',
+      'Dx Salida',
+      'Dx Rel 1',
+      'Dx Rel 2',
+      'Dx Rel 3',
+      'Destino Salida',
+      'Estado Salida',
+      'Causa Muerte Urg.',
+      'Fecha Salida Obs.',
+      'Hora Salida Obs.'
+    ];
+
+    const filas = registros.map(reg => [
+      `"${reg.numFactura}"`,
+      `"${reg.codigoPrestador}"`,
+      `"${reg.tipoIdentificacion}"`,
+      `"${reg.numIdUsuario}"`,
+      reg.fechaIngresoObs,
+      reg.horaIngresoObs,
+      `"${reg.numAutorizacion}"`,
+      `"${reg.causaExterna}"`,
+      `"${reg.diagnosticoSalida}"`,
+      `"${reg.diagnosticoRel1}"`,
+      `"${reg.diagnosticoRel2}"`,
+      `"${reg.diagnosticoRel3}"`,
+      `"${reg.destinoSalida}"`,
+      `"${reg.estadoSalida}"`,
+      `"${reg.causaMuerteUrg}"`,
+      reg.fechaSalidaObs,
+      reg.horaSalidaObs
+    ].join(','));
+
+    const csvContenido = [encabezados.join(','), ...filas].join('\r\n');
+    const blob = new Blob([csvContenido], {type: 'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'registros_observacion.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function limpiarFormulario() {
+    document.getElementById('ripsForm').reset();
+  }
+
+  function mostrarMensajeExito() {
+    const mensaje = document.getElementById('mensajeExito');
+    mensaje.style.display = 'block';
+    setTimeout(() => {
+      mensaje.style.display = 'none';
+    }, 2500);
+  }
+
+  function limpiarRegistros() {
+    if (confirm('¿Estás seguro de que quieres eliminar todos los registros?')) {
+      registros.length = 0;
+      actualizarTabla();
+    }
+  }
+
+  function generarReporte(event) {
+    event.preventDefault();
+    const data = {
+      numFactura: document.getElementById('numFactura').value.trim(),
+      codigoPrestador: document.getElementById('codigoPrestador').value.trim(),
+      tipoIdentificacion: document.getElementById('tipoIdentificacion').value,
+      numIdUsuario: document.getElementById('numIdUsuario').value.trim(),
+      fechaIngresoObs: document.getElementById('fechaIngresoObs').value,
+      horaIngresoObs: document.getElementById('horaIngresoObs').value,
+      numAutorizacion: document.getElementById('numAutorizacion').value.trim(),
+      causaExterna: document.getElementById('causaExterna').value.trim(),
+      diagnosticoSalida: document.getElementById('diagnosticoSalida').value.trim(),
+      diagnosticoRel1: document.getElementById('diagnosticoRel1').value.trim(),
+      diagnosticoRel2: document.getElementById('diagnosticoRel2').value.trim(),
+      diagnosticoRel3: document.getElementById('diagnosticoRel3').value.trim(),
+      destinoSalida: document.getElementById('destinoSalida').value.trim(),
+      estadoSalida: document.getElementById('estadoSalida').value.trim(),
+      causaMuerteUrg: document.getElementById('causaMuerteUrg').value.trim(),
+      fechaSalidaObs: document.getElementById('fechaSalidaObs').value,
+      horaSalidaObs: document.getElementById('horaSalidaObs').value
+    };
+
+    agregarRegistro(data);
+    actualizarTabla();
+    limpiarFormulario();
+    mostrarMensajeExito();
+    return false;
+  }
+
+  document.getElementById('exportBtn').addEventListener('click', descargarCSV);
+  limpiarBtn.addEventListener('click', limpiarRegistros);
+</script>
+
+</body>
+</html>
