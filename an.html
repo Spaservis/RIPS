@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Registro RIPS - Recién Nacido</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f3f7fa;
+    margin: 0; padding: 20px;
+    color: #2c3e50;
+  }
+  h1 {
+    text-align: center;
+    color: #0074b8;
+  }
+  form {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #ffffff;
+    padding: 25px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.08);
+    border-radius: 8px;
+  }
+  label {
+    display: block;
+    margin: 15px 0 5px 0;
+    font-weight: bold;
+  }
+  input, select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #a9c1d9;
+    border-radius: 4px;
+    font-size: 1em;
+    box-sizing: border-box;
+  }
+  button {
+    background-color: #0074b8;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    font-size: 1.1em;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-top: 20px;
+    display: block;
+    width: 100%;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    transition: background-color 0.3s ease;
+  }
+</style>
+</head>
+<body>
+
+<h1>Registro de Datos del Recién Nacido</h1>
+
+<form id="ripsForm" onsubmit="return generarReporte(event)">
+
+  <label for="numFactura">Número de la Factura:</label>
+  <input type="text" id="numFactura" name="numFactura" required maxlength="30" />
+
+  <label for="codigoPrestador">Código del Prestador de Servicios de Salud:</label>
+  <input type="text" id="codigoPrestador" name="codigoPrestador" required maxlength="20" />
+
+  <label for="tipoIdMadre">Tipo de Identificación de la Madre:</label>
+  <select id="tipoIdMadre" name="tipoIdMadre" required>
+    <option value="">-- Seleccione --</option>
+    <option value="CC">Cédula de Ciudadanía</option>
+    <option value="TI">Tarjeta de Identidad</option>
+    <option value="CE">Cédula de Extranjería</option>
+    <option value="PAS">Pasaporte</option>
+    <option value="OTRO">Otro</option>
+  </select>
+
+  <label for="numIdMadre">Número de Identificación de la Madre en el Sistema:</label>
+  <input type="text" id="numIdMadre" name="numIdMadre" required maxlength="30" />
+
+  <label for="fechaNacimientoRN">Fecha de Nacimiento del Recién Nacido:</label>
+  <input type="date" id="fechaNacimientoRN" name="fechaNacimientoRN" required />
+
+  <label for="horaNacimientoRN">Hora de Nacimiento:</label>
+  <input type="time" id="horaNacimientoRN" name="horaNacimientoRN" required />
+
+  <label for="edadGestacional">Edad Gestacional (semanas):</label>
+  <input type="number" id="edadGestacional" name="edadGestacional" min="20" max="45" />
+
+  <label for="controlPrenatal">Control Prenatal:</label>
+  <select id="controlPrenatal" name="controlPrenatal">
+    <option value="">-- Seleccione --</option>
+    <option value="SI">Sí</option>
+    <option value="NO">No</option>
+  </select>
+
+  <label for="sexoRN">Sexo:</label>
+  <select id="sexoRN" name="sexoRN" required>
+    <option value="">-- Seleccione --</option>
+    <option value="M">Masculino</option>
+    <option value="F">Femenino</option>
+    <option value="I">Intersexual</option>
+  </select>
+
+  <label for="pesoRN">Peso (gramos):</label>
+  <input type="number" id="pesoRN" name="pesoRN" min="300" max="6000" />
+
+  <label for="dxRN">Diagnóstico del Recién Nacido:</label>
+  <input type="text" id="dxRN" name="dxRN" maxlength="100" />
+
+  <label for="causaMuerteRN">Causa Básica de Muerte:</label>
+  <input type="text" id="causaMuerteRN" name="causaMuerteRN" maxlength="100" />
+
+  <label for="fechaMuerteRN">Fecha de Muerte del Recién Nacido:</label>
+  <input type="date" id="fechaMuerteRN" name="fechaMuerteRN" />
+
+  <label for="horaMuerteRN">Hora de Muerte del Recién Nacido:</label>
+  <input type="time" id="horaMuerteRN" name="horaMuerteRN" />
+
+  <button type="submit">Agregar Registro</button>
+</form>
+
+<script>
+  const registros = [];
+
+  function agregarRegistro(data) {
+    registros.push(data);
+  }
+
+  function generarReporte(event) {
+    event.preventDefault();
+    const data = {
+      numFactura: document.getElementById('numFactura').value.trim(),
+      codigoPrestador: document.getElementById('codigoPrestador').value.trim(),
+      tipoIdMadre: document.getElementById('tipoIdMadre').value,
+      numIdMadre: document.getElementById('numIdMadre').value.trim(),
+      fechaNacimientoRN: document.getElementById('fechaNacimientoRN').value,
+      horaNacimientoRN: document.getElementById('horaNacimientoRN').value,
+      edadGestacional: document.getElementById('edadGestacional').value,
+      controlPrenatal: document.getElementById('controlPrenatal').value,
+      sexoRN: document.getElementById('sexoRN').value,
+      pesoRN: document.getElementById('pesoRN').value,
+      dxRN: document.getElementById('dxRN').value.trim(),
+      causaMuerteRN: document.getElementById('causaMuerteRN').value.trim(),
+      fechaMuerteRN: document.getElementById('fechaMuerteRN').value,
+      horaMuerteRN: document.getElementById('horaMuerteRN').value
+    };
+
+    agregarRegistro(data);
+    console.log(registros);
+    document.getElementById('ripsForm').reset();
+    alert("Registro agregado correctamente.");
+  }
+</script>
+
+</body>
+</html>
