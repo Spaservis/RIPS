@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Reporte RIPS - Ingreso y Egreso</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f3f7fa;
+    margin: 0; padding: 20px;
+    color: #2c3e50;
+  }
+  h1, h2 {
+    text-align: center;
+    color: #0074b8;
+  }
+  form {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #ffffff;
+    padding: 25px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.08);
+    border-radius: 8px;
+  }
+  label {
+    display: block;
+    margin: 15px 0 5px 0;
+    font-weight: bold;
+  }
+  input[type="text"],
+  input[type="date"],
+  input[type="time"],
+  input[type="number"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #a9c1d9;
+    border-radius: 4px;
+    font-size: 1em;
+    box-sizing: border-box;
+  }
+  button, #exportBtn, #limpiarBtn {
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    font-size: 1.1em;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-top: 20px;
+    display: block;
+    width: 100%;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    transition: background-color 0.3s ease;
+  }
+  #exportBtn { background-color: #0074b8; }
+  #limpiarBtn { background-color: #c0392b; }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 1300px;
+  }
+  th, td {
+    padding: 8px 10px;
+    border: 1px solid #a9c1d9;
+    text-align: left;
+    white-space: nowrap;
+  }
+  th {
+    background-color: #0074b8;
+    color: white;
+  }
+</style>
+</head>
+<body>
+
+<h1>Registro de Ingreso y Egreso</h1>
+
+<form id="ripsForm" onsubmit="return generarReporte(event)">
+
+  <label for="numFactura">Número de la Factura:</label>
+  <input type="text" id="numFactura" name="numFactura" required maxlength="30" />
+
+  <label for="codigoPrestador">Código del Prestador de Servicios de Salud:</label>
+  <input type="text" id="codigoPrestador" name="codigoPrestador" required maxlength="20" />
+
+  <label for="tipoDocumento">Tipo de Documento de Identificación del Usuario:</label>
+  <select id="tipoDocumento" name="tipoDocumento" required>
+    <option value="">-- Seleccione --</option>
+    <option value="CC">Cédula de Ciudadanía</option>
+    <option value="TI">Tarjeta de Identidad</option>
+    <option value="CE">Cédula de Extranjería</option>
+    <option value="PAS">Pasaporte</option>
+    <option value="OTRO">Otro</option>
+  </select>
+
+  <label for="numIdUsuario">Número de Identificación del Usuario en el Sistema:</label>
+  <input type="text" id="numIdUsuario" name="numIdUsuario" required maxlength="30" />
+
+  <label for="viaIngreso">Vía de Ingreso a la Institución:</label>
+  <input type="text" id="viaIngreso" name="viaIngreso" maxlength="100" />
+
+  <label for="fechaIngreso">Fecha de Ingreso a la Institución:</label>
+  <input type="date" id="fechaIngreso" name="fechaIngreso" required />
+
+  <label for="horaIngreso">Hora de Ingreso a la Institución:</label>
+  <input type="time" id="horaIngreso" name="horaIngreso" required />
+
+  <label for="numAutorizacion">Número de Autorización:</label>
+  <input type="text" id="numAutorizacion" name="numAutorizacion" maxlength="30" />
+
+  <label for="causaExterna">Causa Externa:</label>
+  <input type="text" id="causaExterna" name="causaExterna" maxlength="100" />
+
+  <label for="dxIngreso">Diagnóstico Principal de Ingreso:</label>
+  <input type="text" id="dxIngreso" name="dxIngreso" maxlength="20" />
+
+  <label for="dxEgreso">Diagnóstico Principal de Egreso:</label>
+  <input type="text" id="dxEgreso" name="dxEgreso" maxlength="20" />
+
+  <label for="dxRel1">Diagnóstico Relacionado Nro. 1 de Egreso:</label>
+  <input type="text" id="dxRel1" name="dxRel1" maxlength="20" />
+
+  <label for="dxRel2">Diagnóstico Relacionado Nro. 2 de Egreso:</label>
+  <input type="text" id="dxRel2" name="dxRel2" maxlength="20" />
+
+  <label for="dxRel3">Diagnóstico Relacionado Nro. 3 de Egreso:</label>
+  <input type="text" id="dxRel3" name="dxRel3" maxlength="20" />
+
+  <label for="dxComplicacion">Diagnóstico de la Complicación:</label>
+  <input type="text" id="dxComplicacion" name="dxComplicacion" maxlength="100" />
+
+  <label for="estadoSalida">Estado a la Salida:</label>
+  <input type="text" id="estadoSalida" name="estadoSalida" maxlength="50" />
+
+  <label for="dxCausaMuerte">Diagnóstico de la Causa Básica de Muerte:</label>
+  <input type="text" id="dxCausaMuerte" name="dxCausaMuerte" maxlength="100" />
+
+  <label for="fechaEgreso">Fecha de Egreso:</label>
+  <input type="date" id="fechaEgreso" name="fechaEgreso" />
+
+  <label for="horaEgreso">Hora de Egreso:</label>
+  <input type="time" id="horaEgreso" name="horaEgreso" />
+
+  <button type="submit">Agregar Registro</button>
+</form>
+
+<script>
+  const registros = [];
+
+  function agregarRegistro(data) {
+    registros.push(data);
+  }
+
+  function generarReporte(event) {
+    event.preventDefault();
+    const data = {
+      numFactura: document.getElementById('numFactura').value.trim(),
+      codigoPrestador: document.getElementById('codigoPrestador').value.trim(),
+      tipoDocumento: document.getElementById('tipoDocumento').value,
+      numIdUsuario: document.getElementById('numIdUsuario').value.trim(),
+      viaIngreso: document.getElementById('viaIngreso').value.trim(),
+      fechaIngreso: document.getElementById('fechaIngreso').value,
+      horaIngreso: document.getElementById('horaIngreso').value,
+      numAutorizacion: document.getElementById('numAutorizacion').value.trim(),
+      causaExterna: document.getElementById('causaExterna').value.trim(),
+      dxIngreso: document.getElementById('dxIngreso').value.trim(),
+      dxEgreso: document.getElementById('dxEgreso').value.trim(),
+      dxRel1: document.getElementById('dxRel1').value.trim(),
+      dxRel2: document.getElementById('dxRel2').value.trim(),
+      dxRel3: document.getElementById('dxRel3').value.trim(),
+      dxComplicacion: document.getElementById('dxComplicacion').value.trim(),
+      estadoSalida: document.getElementById('estadoSalida').value.trim(),
+      dxCausaMuerte: document.getElementById('dxCausaMuerte').value.trim(),
+      fechaEgreso: document.getElementById('fechaEgreso').value,
+      horaEgreso: document.getElementById('horaEgreso').value
+    };
+
+    agregarRegistro(data);
+    console.log(registros);
+    document.getElementById('ripsForm').reset();
+    alert("Registro agregado correctamente.");
+  }
+</script>
+
+</body>
+</html>
