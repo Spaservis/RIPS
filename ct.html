@@ -65,6 +65,7 @@
   const registros = [];
   const exportBtn = document.getElementById('exportBtn');
   const limpiarBtn = document.getElementById('limpiarBtn');
+  const contraseñaExportar = "admi123";
 
   function agregarRegistro(data) {
     registros.push(data);
@@ -106,6 +107,13 @@
 
   exportBtn.addEventListener('click', () => {
     if (!registros.length) return alert("No hay registros");
+
+    const pass = prompt("Ingrese la contraseña para exportar el archivo:");
+    if (pass !== contraseñaExportar) {
+      alert("Contraseña incorrecta. No se puede exportar.");
+      return;
+    }
+
     const encabezados = Object.keys(registros[0]);
     const filas = registros.map(r => Object.values(r));
     let csv = [encabezados.join(",")];
@@ -120,7 +128,15 @@
   });
 
   limpiarBtn.addEventListener('click', () => {
-    if (confirm("¿Eliminar todos los registros?")) {
+    if (!registros.length) return alert("No hay registros para eliminar.");
+
+    const pass = prompt("Ingrese la contraseña para eliminar los registros:");
+    if (pass !== contraseñaExportar) {
+      alert("Contraseña incorrecta. No se pueden eliminar los registros.");
+      return;
+    }
+
+    if (confirm("¿Está seguro de eliminar todos los registros?")) {
       registros.length = 0;
       actualizarTabla();
     }
