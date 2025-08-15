@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Perfil Personal</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        h2 {
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        textarea {
+            resize: vertical;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            font-size: 16px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+        table {
+            border-collapse: collapse;
+            width: max-content;
+            min-width: 100%;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 6px 8px;
+            text-align: left;
+            white-space: nowrap;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .edit-btn, .delete-btn {
+            cursor: pointer;
+            color: #007BFF;
+            text-decoration: underline;
+        }
+        .delete-btn {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Formulario de Perfil Personal</h1>
+    <form id="personalForm">
+        <!-- Información Personal -->
+        <div class="section">
+            <h2>Información Personal</h2>
+            <label>Nombre Completo:</label>
+            <input type="text" id="nombre" required>
+            <label>Fecha de Nacimiento:</label>
+            <input type="date" id="fecha_nacimiento" required>
+            <label>Género:</label>
+            <select id="genero" required>
+                <option value="">Seleccione</option>
+                <option>Masculino</option>
+                <option>Femenino</option>
+                <option>Otro</option>
+            </select>
+            <label>Teléfono:</label>
+            <input type="tel" id="telefono">
+            <label>Correo Electrónico:</label>
+            <input type="email" id="email">
+        </div>
+
+        <!-- Círculo Familiar -->
+        <div class="section">
+            <h2>Círculo Familiar</h2>
+            <label>Descripción:</label>
+            <textarea id="familia" rows="2"></textarea>
+            <label>Relaciones familiares:</label>
+            <textarea id="relaciones_familia" rows="2"></textarea>
+        </div>
+
+        <!-- Círculo Social -->
+        <div class="section">
+            <h2>Círculo Social</h2>
+            <label>Descripción:</label>
+            <textarea id="social" rows="2"></textarea>
+            <label>Actividades Sociales:</label>
+            <textarea id="actividades_sociales" rows="2"></textarea>
+        </div>
+
+        <!-- Círculo Cultural -->
+        <div class="section">
+            <h2>Círculo Cultural</h2>
+            <label>Descripción:</label>
+            <textarea id="cultural" rows="2"></textarea>
+            <label>Intereses Culturales:</label>
+            <textarea id="intereses_culturales" rows="2"></textarea>
+        </div>
+
+        <!-- Círculo Laboral -->
+        <div class="section">
+            <h2>Círculo Laboral</h2>
+            <label>Descripción:</label>
+            <textarea id="laboral" rows="2"></textarea>
+            <label>Posición Laboral:</label>
+            <input type="text" id="posicion_laboral">
+            <label>Experiencia Laboral:</label>
+            <textarea id="experiencia" rows="2"></textarea>
+        </div>
+
+        <!-- Aspectos Médicos -->
+        <div class="section">
+            <h2>Aspectos Médicos</h2>
+            <label>Condiciones Médicas:</label>
+            <textarea id="condiciones_medicas" rows="2"></textarea>
+            <label>Medicamentos:</label>
+            <textarea id="medicamentos" rows="2"></textarea>
+            <label>Alergias:</label>
+            <textarea id="alergias" rows="2"></textarea>
+        </div>
+
+        <!-- Aspectos Sociales y Culturales -->
+        <div class="section">
+            <h2>Aspectos Sociales y Culturales</h2>
+            <label>Influencia Social y Cultural:</label>
+            <textarea id="social_cultural" rows="2"></textarea>
+            <label>Actividades Culturales:</label>
+            <textarea id="actividades_culturales" rows="2"></textarea>
+        </div>
+
+        <!-- Aspectos Físicos -->
+        <div class="section">
+            <h2>Aspectos Físicos</h2>
+            <label>Estado Físico:</label>
+            <textarea id="estado_fisico" rows="2"></textarea>
+            <label>Frecuencia de Ejercicio:</label>
+            <input type="text" id="ejercicio">
+        </div>
+
+        <!-- Aspectos Mentales -->
+        <div class="section">
+            <h2>Aspectos Mentales</h2>
+            <label>Estado Mental:</label>
+            <textarea id="estado_mental" rows="2"></textarea>
+            <label>Estrategias de Afrontamiento:</label>
+            <textarea id="estrategias_coping" rows="2"></textarea>
+        </div>
+
+        <button type="button" onclick="addRecord()">Agregar Registro</button>
+    </form>
+
+    <h2>Registros</h2>
+    <div class="table-container">
+        <table id="recordsTable">
+            <thead></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <button type="button" onclick="exportToExcel()">Exportar a Excel</button>
+</div>
+
+<script>
+    let records = [];
+
+    function addRecord() {
+        const record = {};
+        document.querySelectorAll('#personalForm input, #personalForm textarea, #personalForm select')
+            .forEach(el => record[el.id] = el.value);
+
+        if (record.nombre && record.fecha_nacimiento && record.genero) {
+            records.push(record);
+            renderTable();
+            document.getElementById('personalForm').reset();
+        } else {
+            alert('Complete los campos requeridos.');
+        }
+    }
+
+    function renderTable() {
+        const tbody = document.querySelector('#recordsTable tbody');
+        const thead = document.querySelector('#recordsTable thead');
+        tbody.innerHTML = '';
+        thead.innerHTML = '';
+
+        if (records.length > 0) {
+            const headerRow = document.createElement('tr');
+            Object.keys(records[0]).forEach(key => {
+                const th = document.createElement('th');
+                th.textContent = key.replace(/_/g, ' ');
+                headerRow.appendChild(th);
+            });
+            const thAcciones = document.createElement('th');
+            thAcciones.textContent = 'Acciones';
+            headerRow.appendChild(thAcciones);
+            thead.appendChild(headerRow);
+        }
+
+        records.forEach((record, index) => {
+            const tr = document.createElement('tr');
+            Object.values(record).forEach(value => {
+                const td = document.createElement('td');
+                td.textContent = value;
+                tr.appendChild(td);
+            });
+            const tdAcciones = document.createElement('td');
+            tdAcciones.innerHTML = `
+                <span class="edit-btn" onclick="editRecord(${index})">Editar</span> |
+                <span class="delete-btn" onclick="deleteRecord(${index})">Eliminar</span>
+            `;
+            tr.appendChild(tdAcciones);
+            tbody.appendChild(tr);
+        });
+    }
+
+    function deleteRecord(index) {
+        records.splice(index, 1);
+        renderTable();
+    }
+
+    function editRecord(index) {
+        const record = records[index];
+        for (let key in record) {
+            if (document.getElementById(key)) {
+                document.getElementById(key).value = record[key];
+            }
+        }
+        deleteRecord(index);
+    }
+
+    function exportToExcel() {
+        const ws = XLSX.utils.json_to_sheet(records);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Registros');
+        XLSX.writeFile(wb, 'registros.xlsx');
+    }
+</script>
+</body>
+</html>
