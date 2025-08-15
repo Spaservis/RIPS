@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Exportar y Editar Datos</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; background: white; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background: #eee; }
+    td[contenteditable="true"] { background: #fdfd96; }
+    button { padding: 10px; margin-top: 10px; cursor: pointer; }
+    #formAgregar input { padding: 5px; margin-right: 5px; }
+</style>
+</head>
+<body>
+
+<h2>Exportar, Agregar y Actualizar Datos</h2>
+
+<input type="file" id="inputExcel" accept=".xlsx,.xls">
+<div id="formAgregar"></div>
+<table id="tablaDatos"></table>
+
+<button id="btnExportar">Exportar seleccionados</button>
+<button id="btnAdmin">Guardar como Administrador</button>
+
+<script>
+let datos = [];
+
+// Recuperar datos guardados si existen
+if (localStorage.getItem("matrizGuardada")) {
+    datos = JSON.parse(localStorage.getItem("matrizGuardada"));
+    mostrarFormularioAgregar();
+    mostrarTabla(datos);
+}
+
+document.getElementById("inputExcel").addEventListener("change", function(e) {
+    let archivo = e.target.files[0];
+    let lector = new FileReader();
+    lector.onload = function(e) {
+        let data = new Uint8Array(e.target.result);
+        let workbook = XLSX.read(data, { type: 'array' });
+        let primeraHoja = workbook.SheetNames[0];
+        let hoja = workbook.Sheets[primeraHoja];
+        datos = XLSX.utils.sheet_to_json(hoja, { header: 1 });
+
+        mostrarFormularioAgregar();
+        mostrarTabla(datos);
+    };
+    lector.readAsArrayBuffer(archivo);
+});
+
+function mostrarFormularioAgregar() {
+    let formHTML = "<h3>Agregar nuevo registro</h3>";
+    datos[0].forEach((header, index) => {
+        formHTML += `<input type="text" id="nuevoCampo${index}" placeholder="${header}">`;
+    });
+    formHTML += `<button onclick="agregarRegistro()">Agregar</button>`;
+    document.getElementById("formAgregar").innerHTML = formHTML;
+}
+
+function mostrarTabla(datos) {
+    let tabla = "<tr><th>Seleccionar</th>";
+    datos[0].forEach(celda => tabla += `<th>${celda}</th>`);
+    tabla += "</tr>";
+
+    for (let i = 1; i < datos.length; i++) {
+        tabla += "<tr>";
+        tabla += `<td><input type="checkbox" class="filaCheck"></td>`;
+        datos[i].forEach((celda, colIndex) => {
+            tabla += `<td contenteditable="true" oninput="actualizarCelda(${i},${colIndex}, this.innerText)">${celda ?? ""}</td>`;
+        });
+        tabla += "</tr>";
+    }
+    document.getElementById("tablaDatos").innerHTML = tabla;
+}
+
+function actualizarCelda(fila, columna, valor) {
+    datos[fila][columna] = valor;
+}
+
+function agregarRegistro() {
+    let nuevoRegistro = [];
+    datos[0].forEach((_, index) => {
+        nuevoRegistro.push(document.getElementById(`nuevoCampo${index}`).value);
+    });
+    datos.push(nuevoRegistro);
+    mostrarTabla(datos);
+}
+
+// Exportar seleccionados
+document.getElementById("btnExportar").addEventListener("click", function() {
+    let filas = document.querySelectorAll("#tablaDatos tr");
+    let seleccionados = [datos[0]]; // encabezado
+
+    for (let i = 1; i < filas.length; i++) {
+        let check = filas[i].querySelector(".filaCheck");
+        if (check && check.checked) {
+            seleccionados.push(datos[i]);
+        }
+    }
+
+    let wb = XLSX.utils.book_new();
+    let ws = XLSX.utils.aoa_to_sheet(seleccionados);
+    XLSX.utils.book_append_sheet(wb, ws, "Seleccionados");
+    XLSX.writeFile(wb, "datos_seleccionados.xlsx");
+});
+
+// Botón Administrador para guardar matriz
+document.getElementById("btnAdmin").addEventListener("click", function() {
+    let pass = prompt("Ingrese la contraseña de administrador:");
+    if (pass === "admi123") {
+        localStorage.setItem("matrizGuardada", JSON.stringify(datos));
+        alert("Matriz guardada correctamente. Podrás recuperarla al recargar la página.");
+    } else {
+        alert("Contraseña incorrecta");
+    }
+});
+</script>
+
+</body>
+</html>
